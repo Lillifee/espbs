@@ -2,23 +2,25 @@
 #ifndef WebServerHelper_h
 #define WebServerHelper_h
 
-#include <ESPAsyncWebServer.h>
-#include <Update.h>
-#include <SPIFFS.h>
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <WiFiHelper.h>
+#include "ArduinoJson.h"
+#include "AsyncJson.h"
+#include "ESPAsyncWebServer.h"
+#include "SPIFFS.h"
+#include "Update.h"
+#include "WiFiHelper.h"
 
-class WebServerHelperClass
-{
-private:
+class WebServerHelperClass {
+ private:
   void uploadFile(int command, AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
-  
-public:
-  AsyncWebServer asyncServer;
+
+ public:
+  AsyncWebServer server;
   WebServerHelperClass();
   void start();
-  bool isRunning();
+
+  using SleepFunc = void (*)();
+  SleepFunc sleep;
+  void onSleep(SleepFunc sleep = nullptr);
 };
 
 extern WebServerHelperClass WebServerHelper;

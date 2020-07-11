@@ -1,7 +1,9 @@
 #include "MpuHelper.h"
 
-void MpuHelperClass::initialize()
-{
+const String urlPart1 = "http://webserver/dev/sps/io/ESP1-";
+const String urlPart2 = "/pulse";
+
+void MpuHelperClass::setup() {
   Wire.begin(SDA, SCL);
 
   // TODO remove afterwards
@@ -11,7 +13,12 @@ void MpuHelperClass::initialize()
   mpu6050.initialize();
 
   Serial.println("Testing device connections...");
-  Serial.println(mpu6050.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+  if (!mpu6050.testConnection()) {
+    Serial.println("MPU6050 connection failed");
+    return;
+  }
+
+  Serial.println("MPU6050 connection successful");
 
   // make sure accel is running
   mpu6050.setSleepEnabled(false);
@@ -41,20 +48,24 @@ void MpuHelperClass::initialize()
   mpu6050.setMotionDetectionDuration(1);
   mpu6050.setMotionDetectionThreshold(20);
 
-  logSettings();
+  // logSettings();
 }
 
-void MpuHelperClass::sleep()
-{
+void MpuHelperClass::loop() {
+  readValues();
+  sendHttpRequest();
+}
+
+void MpuHelperClass::sleep() {
   // set accel HPF to hold
   mpu6050.setDHPFMode(7);
 
   // set the frequency to wakeup
   mpu6050.setWakeFrequency(0);
 
-  mpu6050.setStandbyXGyroEnabled(true); // should be already set
-  mpu6050.setStandbyYGyroEnabled(true); // should be already set
-  mpu6050.setStandbyZGyroEnabled(true); // should be already set
+  mpu6050.setStandbyXGyroEnabled(true);  // should be already set
+  mpu6050.setStandbyYGyroEnabled(true);  // should be already set
+  mpu6050.setStandbyZGyroEnabled(true);  // should be already set
 
   mpu6050.setTempSensorEnabled(false);
   mpu6050.setWakeCycleEnabled(true);
@@ -66,8 +77,7 @@ void MpuHelperClass::sleep()
   digitalWrite(SCL, LOW);
 }
 
-void MpuHelperClass::readValues()
-{
+void MpuHelperClass::readValues() {
   mpu6050.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
   Serial.print("a/g:\t");
@@ -79,15 +89,14 @@ void MpuHelperClass::readValues()
   Serial.print("\t");
 
   calculateSide();
+  sendHttpRequest();
 }
 
-int MpuHelperClass::calculateAxis(int16_t value)
-{
+int MpuHelperClass::calculateAxis(int16_t value) {
   return value > 8000 ? 1 : value < -8000 ? -1 : 0;
 }
 
-void MpuHelperClass::calculateSide()
-{
+void MpuHelperClass::calculateSide() {
   int sideX = calculateAxis(ax);
   int sideY = calculateAxis(ay);
   int sideZ = calculateAxis(az);
@@ -110,8 +119,23 @@ void MpuHelperClass::calculateSide()
   // Serial.println(side);
 }
 
-void MpuHelperClass::logSettings()
-{
+// TODO replace with udp
+void MpuHelperClass::sendHttpRequest() {
+  if (MpuHelper.prevSide == MpuHelper.side)
+    return;
+
+  // This will send the request to the server
+  HTTPClient http;
+  String url = urlPart1 + MpuHelper.side + urlPart2;
+
+  Serial.println(url);
+
+  http.begin(url);
+  http.GET();
+  http.end();
+}
+
+void MpuHelperClass::logSettings() {
   Serial.println("WakeCycle" + String(mpu6050.getWakeCycleEnabled()));
   Serial.println("DHPFMode " + String(mpu6050.getDHPFMode()));
   Serial.println("DLPFMode " + String(mpu6050.getDLPFMode()));

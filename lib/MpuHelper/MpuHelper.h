@@ -2,13 +2,13 @@
 #ifndef MpuHelper_h
 #define MpuHelper_h
 
+#include "HTTPClient.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include "Wire.h"
 
-class MpuHelperClass
-{
-private:
+class MpuHelperClass {
+ private:
   MPU6050 mpu6050;
 
   int16_t ax, ay, az;
@@ -17,14 +17,16 @@ private:
   int calculateAxis(int16_t value);
   void calculateSide();
   void logSettings();
+  void readValues();
+  void sendHttpRequest();
 
-public:
+ public:
   String prevSide;
   String side;
 
-  void initialize();
+  void setup();
+  void loop();
   void sleep();
-  void readValues();
 };
 
 extern MpuHelperClass MpuHelper;
