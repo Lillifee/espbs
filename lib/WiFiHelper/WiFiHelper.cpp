@@ -124,12 +124,14 @@ bool WiFiHelperClass::connect(bool firstConnect) {
     subnetIP.fromString(subnet);
     gatewayIP.fromString(gateway);
 
-    Serial.println("WIFI use static IP: " + ipv4);
+    Serial.print("WIFI use static IP: ");
+    Serial.println(ipv4);
 
     WiFi.config(ipv4IP, gatewayIP, subnetIP, dnsIP);
   }
 
-  Serial.println("WIFI connect to " + ssid);
+  Serial.print("WIFI connect to ");
+  Serial.println(ssid);
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid.c_str(), password.c_str());
@@ -146,7 +148,8 @@ bool WiFiHelperClass::connect(bool firstConnect) {
   }
 
   wifiTime = millis() - wifiStartTime;
-  Serial.println("WIFI connection took " + String(wifiTime));
+  Serial.print("WIFI connection took ");
+  Serial.println(String(wifiTime));
 
   return WiFi.status() == WL_CONNECTED;
 }
@@ -159,7 +162,8 @@ void WiFiHelperClass::setupAP() {
   WiFi.softAP("espbs");
 
   IPAddress myIP = WiFi.softAPIP();
-  Serial.println("AP IP address: " + myIP.toString());
+  Serial.print("AP IP address: ");
+  Serial.println(myIP.toString());
 }
 
 void WiFiHelperClass::setupMDNS() {
@@ -167,14 +171,17 @@ void WiFiHelperClass::setupMDNS() {
   if (!MDNS.begin(host.c_str())) {
     Serial.println("Error setting up MDNS responder!");
   }
-  Serial.println("mDNS responder started connect to http://" + host + ".local");
+  Serial.print("mDNS responder started connect to http://");
+  Serial.print(host);
+  Serial.println(".local");
 }
 
 void WiFiHelperClass::sleep() {
-  WiFi.disconnect();
+  WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
-
   btStop();
+
+  adc_power_off();
   esp_wifi_stop();
 }
 

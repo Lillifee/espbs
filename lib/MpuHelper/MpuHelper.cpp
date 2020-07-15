@@ -6,7 +6,7 @@ const String urlPart2 = "/pulse";
 void MpuHelperClass::setup() {
   Wire.begin(SDA, SCL);
 
-  // TODO remove afterwards
+  // Reset the MPU - to try different settings
   // mpu6050.reset();
   // delay(100);
 
@@ -70,8 +70,6 @@ void MpuHelperClass::sleep() {
   mpu6050.setTempSensorEnabled(false);
   mpu6050.setWakeCycleEnabled(true);
 
-  // mpu6050.setFullScaleAccelRange(3);
-
   // Write low to MPU pins to fallback to 6.5uA
   digitalWrite(SDA, LOW);
   digitalWrite(SCL, LOW);
@@ -80,19 +78,17 @@ void MpuHelperClass::sleep() {
 void MpuHelperClass::readValues() {
   mpu6050.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-  Serial.print("a/g:\t");
   Serial.print(ax);
   Serial.print("\t");
   Serial.print(ay);
   Serial.print("\t");
   Serial.println(az);
-  Serial.print("\t");
 
   calculateSide();
   sendHttpRequest();
 }
 
-int MpuHelperClass::calculateAxis(int16_t value) {
+int MpuHelperClass::calculateAxis(int16_t &value) {
   return value > 8000 ? 1 : value < -8000 ? -1 : 0;
 }
 
@@ -103,31 +99,32 @@ void MpuHelperClass::calculateSide() {
 
   prevSide = side;
 
-  if (sideX == 0 && sideY == 0 && sideZ == 1)
-    side = "A";
-  if (sideX == 0 && sideY == 0 && sideZ == -1)
-    side = "B";
-  if (sideX == 0 && sideY == -1 && sideZ == 0)
-    side = "C";
-  if (sideX == 0 && sideY == 1 && sideZ == 0)
-    side = "D";
-  if (sideX == 1 && sideY == 0 && sideZ == 0)
-    side = "E";
-  if (sideX == -1 && sideY == 0 && sideZ == 0)
-    side = "F";
+  if (sideX == 0 && sideY == 0 && sideZ == 1) {
+    side = 'A';
+  } else if (sideX == 0 && sideY == 0 && sideZ == -1) {
+    side = 'B';
+  } else if (sideX == 0 && sideY == -1 && sideZ == 0) {
+    side = 'C';
+  } else if (sideX == 0 && sideY == 1 && sideZ == 0) {
+    side = 'D';
+  } else if (sideX == 1 && sideY == 0 && sideZ == 0) {
+    side = 'E';
+  } else if (sideX == -1 && sideY == 0 && sideZ == 0) {
+    side = 'F';
+  }
 
   // Serial.println(side);
 }
 
 // TODO replace with udp
 void MpuHelperClass::sendHttpRequest() {
-  if (MpuHelper.prevSide == MpuHelper.side)
+  if (MpuHelper.prevSide == MpuHelper.side) {
     return;
+  }
 
   // This will send the request to the server
   HTTPClient http;
   String url = urlPart1 + MpuHelper.side + urlPart2;
-
   Serial.println(url);
 
   http.begin(url);
@@ -136,22 +133,35 @@ void MpuHelperClass::sendHttpRequest() {
 }
 
 void MpuHelperClass::logSettings() {
-  Serial.println("WakeCycle" + String(mpu6050.getWakeCycleEnabled()));
-  Serial.println("DHPFMode " + String(mpu6050.getDHPFMode()));
-  Serial.println("DLPFMode " + String(mpu6050.getDLPFMode()));
+  Serial.print("WakeCycle ");
+  Serial.println(String(mpu6050.getWakeCycleEnabled()));
+
+  Serial.print("DHPFMode ");
+  Serial.println(String(mpu6050.getDHPFMode()));
+  Serial.print("DLPFMode ");
+  Serial.println(String(mpu6050.getDLPFMode()));
+
+  Serial.println("AccelStandby ");
+  Serial.println(String(mpu6050.getStandbyXAccelEnabled()));
+
+  Serial.print("GyroStandby ");
+  Serial.println(String(mpu6050.getStandbyXGyroEnabled()));
+  Serial.print("TempSensor ");
+  Serial.println(String(mpu6050.getTempSensorEnabled()));
   Serial.println();
 
-  Serial.println("AccelStandby " + String(mpu6050.getStandbyXAccelEnabled()));
-  Serial.println("GyroStandby " + String(mpu6050.getStandbyXGyroEnabled()));
-  Serial.println("TempSensor  " + String(mpu6050.getTempSensorEnabled()));
-  Serial.println();
-
-  Serial.println("FIFO Enabled " + String(mpu6050.getFIFOEnabled()));
-  Serial.println("XGyroFifo Enabled " + String(mpu6050.getXGyroFIFOEnabled()));
-  Serial.println("IntFIFOBufferOverflow Enabled " + String(mpu6050.getIntFIFOBufferOverflowEnabled()));
-  Serial.println("Clock Source " + String(mpu6050.getClockSource()));
-  Serial.println("FullScalAccelRange " + String(mpu6050.getFullScaleAccelRange()));
-  Serial.println("FullScalGyroRange " + String(mpu6050.getFullScaleGyroRange()));
+  Serial.print("FIFO Enabled ");
+  Serial.println(String(mpu6050.getFIFOEnabled()));
+  Serial.print("XGyroFifo Enabled ");
+  Serial.println(String(mpu6050.getXGyroFIFOEnabled()));
+  Serial.print("IntFIFOBufferOverflow Enabled ");
+  Serial.println(String(mpu6050.getIntFIFOBufferOverflowEnabled()));
+  Serial.print("Clock Source ");
+  Serial.println(String(mpu6050.getClockSource()));
+  Serial.print("FullScalAccelRange ");
+  Serial.println(String(mpu6050.getFullScaleAccelRange()));
+  Serial.print("FullScalGyroRange ");
+  Serial.println(String(mpu6050.getFullScaleGyroRange()));
 
   Serial.println();
 }

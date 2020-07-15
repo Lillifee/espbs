@@ -14,15 +14,15 @@ class MpuHelperClass {
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
 
-  int calculateAxis(int16_t value);
+  int calculateAxis(int16_t &value);
   void calculateSide();
   void logSettings();
   void readValues();
   void sendHttpRequest();
 
  public:
-  String prevSide;
-  String side;
+  char prevSide;
+  char side;
 
   void setup();
   void loop();

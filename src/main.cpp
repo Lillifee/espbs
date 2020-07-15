@@ -25,12 +25,14 @@ void setup() {
   setCpuFrequencyMhz(80);
 
   Serial.begin(115200);
-  Serial.println("bootCount " + String(bootCount));
+  Serial.print("bootCount ");
+  Serial.println(String(bootCount));
 
   MpuHelper.setup();
 
   if (bootCount == 1) {
     pinMode(LED_BUILTIN, OUTPUT);
+
     WiFiHelper.server();
 
     WebServerHelper.onSleep(deepSleep);

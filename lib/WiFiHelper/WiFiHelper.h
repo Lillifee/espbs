@@ -8,6 +8,7 @@
 #include "WiFi.h"
 #include "WiFiAP.h"
 #include "WiFiClient.h"
+#include "driver/adc.h"
 #include "esp_wifi.h"
 
 #define DEFAULT_HOST "esp32"
