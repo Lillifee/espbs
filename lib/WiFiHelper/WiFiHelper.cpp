@@ -1,7 +1,7 @@
 #include "WiFiHelper.h"
 
 void WiFiHelperClass::read() {
-  preferences.begin("esp", false);  // create folder
+  preferences.begin("esp", true);  // create folder
 
   ssid = preferences.getString("ssid", DEFAULT_SSID);
   password = preferences.getString("password", DEFAULT_PSK);
@@ -106,10 +106,12 @@ void WiFiHelperClass::server() {
   });
 }
 
+void WiFiHelperClass::setup() {
+  read();
+}
+
 bool WiFiHelperClass::connect(bool firstConnect) {
   if (WiFi.status() == WL_CONNECTED) return true;
-
-  read();
 
   unsigned long wifiStartTime = millis();
 

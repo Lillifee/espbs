@@ -37,6 +37,7 @@ class WiFiHelperClass {
   void setupMDNS();
 
  public:
+  void setup();
   void server();
   bool connect(bool firstConnect = false);
   void sleep();

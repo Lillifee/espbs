@@ -2,17 +2,26 @@
 #ifndef MpuHelper_h
 #define MpuHelper_h
 
+#include "ArduinoJson.h"
+#include "AsyncJson.h"
 #include "HTTPClient.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
+#include "WebServerHelper.h"
 #include "Wire.h"
 
 class MpuHelperClass {
  private:
   MPU6050 mpu6050;
+  Preferences preferences;
 
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
+
+  String urls[6];
+
+  void read();
+  void write();
 
   int calculateAxis(int16_t &value);
   void calculateSide();
@@ -20,11 +29,18 @@ class MpuHelperClass {
   void readValues();
   void sendHttpRequest();
 
+  unsigned long httpTime;
+  unsigned long setupTime;
+
+  int duration;
+  int threshold;
+
  public:
-  char prevSide;
-  char side;
+  int prevSide;
+  int side;
 
   void setup();
+  void server();
   void loop();
   void sleep();
 };

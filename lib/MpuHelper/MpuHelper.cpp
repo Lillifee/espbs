@@ -1,12 +1,30 @@
 #include "MpuHelper.h"
 
-const String urlPart1 = "http://webserver/dev/sps/io/ESP1-";
-const String urlPart2 = "/pulse";
+void MpuHelperClass::read() {
+  preferences.begin("mpu", true);
+  preferences.getBytes("sideUrl", urls, sizeof(urls));
+  duration = preferences.getInt("duration", 1);
+  threshold = preferences.getInt("threshold", 20);
+  preferences.end();
+}
+
+void MpuHelperClass::write() {
+  preferences.begin("mpu", false);
+  preferences.putBytes("sideUrl", urls, sizeof(urls));
+  preferences.putInt("duration", duration);
+  preferences.putInt("threshold", threshold);
+  preferences.end();
+}
 
 void MpuHelperClass::setup() {
+  unsigned long setupStartTime = millis();
+  Serial.println("Setup MPU helper");
+
+  read();
+
   Wire.begin(SDA, SCL);
 
-  // Reset the MPU - to try different settings
+  // Reset the MPU (to try different settings)
   // mpu6050.reset();
   // delay(100);
 
@@ -45,10 +63,14 @@ void MpuHelperClass::setup() {
 
   // enable motion interrupt
   mpu6050.setIntMotionEnabled(true);
-  mpu6050.setMotionDetectionDuration(1);
-  mpu6050.setMotionDetectionThreshold(20);
+  mpu6050.setMotionDetectionDuration(duration);    // 1
+  mpu6050.setMotionDetectionThreshold(threshold);  // 20
 
   // logSettings();
+
+  setupTime = millis() - setupStartTime;
+  Serial.print("Setup MPU helper took ");
+  Serial.println(setupTime);
 }
 
 void MpuHelperClass::loop() {
@@ -57,6 +79,10 @@ void MpuHelperClass::loop() {
 }
 
 void MpuHelperClass::sleep() {
+  if (!mpu6050.testConnection()) {
+    return;
+  }
+
   // set accel HPF to hold
   mpu6050.setDHPFMode(7);
 
@@ -100,17 +126,17 @@ void MpuHelperClass::calculateSide() {
   prevSide = side;
 
   if (sideX == 0 && sideY == 0 && sideZ == 1) {
-    side = 'A';
+    side = 0;
   } else if (sideX == 0 && sideY == 0 && sideZ == -1) {
-    side = 'B';
+    side = 1;
   } else if (sideX == 0 && sideY == -1 && sideZ == 0) {
-    side = 'C';
+    side = 2;
   } else if (sideX == 0 && sideY == 1 && sideZ == 0) {
-    side = 'D';
+    side = 3;
   } else if (sideX == 1 && sideY == 0 && sideZ == 0) {
-    side = 'E';
+    side = 4;
   } else if (sideX == -1 && sideY == 0 && sideZ == 0) {
-    side = 'F';
+    side = 5;
   }
 
   // Serial.println(side);
@@ -118,18 +144,21 @@ void MpuHelperClass::calculateSide() {
 
 // TODO replace with udp
 void MpuHelperClass::sendHttpRequest() {
-  if (MpuHelper.prevSide == MpuHelper.side) {
+  if (prevSide == side) {
     return;
   }
+  unsigned long httpStartTime = millis();
 
-  // This will send the request to the server
   HTTPClient http;
-  String url = urlPart1 + MpuHelper.side + urlPart2;
-  Serial.println(url);
+  Serial.println(urls[side]);
 
-  http.begin(url);
+  http.begin(urls[side]);
   http.GET();
   http.end();
+
+  httpTime = millis() - httpStartTime;
+  Serial.print("Setup MPU helper took ");
+  Serial.println(setupTime);
 }
 
 void MpuHelperClass::logSettings() {
@@ -164,6 +193,49 @@ void MpuHelperClass::logSettings() {
   Serial.println(String(mpu6050.getFullScaleGyroRange()));
 
   Serial.println();
+}
+
+void MpuHelperClass::server() {
+  Serial.println("Setup MPU server");
+
+  WebServerHelper.server.on("/api/mpu", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    int args = request->args();
+
+    if (args > 0) {
+      request->send(200, "text/plain", "message received");
+      Serial.println("Update mpu settings");
+
+      for (int i = 0; i < 6; i++) {
+        String value = request->arg("side" + String(i));
+        if (value.length() > 0) {
+          urls[i] = request->arg(side);
+        }
+      }
+
+      if (request->hasArg("duration")) duration = request->arg("duration").toInt();
+      if (request->hasArg("threshold")) threshold = request->arg("threshold").toInt();
+
+      write();
+
+    } else {
+      AsyncJsonResponse *response = new AsyncJsonResponse();
+      response->addHeader("Server", "ESP Async Web Server");
+      JsonVariant &root = response->getRoot();
+
+      root["side"] = side;
+      root["setupTime"] = setupTime;
+      root["httpTime"] = httpTime;
+      root["duration"] = duration;
+      root["threshold"] = threshold;
+
+      for (int i = 0; i < 6; i++) {
+        root["side" + String(i)] = urls[i];
+      }
+
+      response->setLength();
+      request->send(response);
+    }
+  });
 }
 
 MpuHelperClass MpuHelper;

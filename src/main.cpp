@@ -28,12 +28,14 @@ void setup() {
   Serial.print("bootCount ");
   Serial.println(String(bootCount));
 
+  WiFiHelper.setup();
   MpuHelper.setup();
 
   if (bootCount == 1) {
     pinMode(LED_BUILTIN, OUTPUT);
 
     WiFiHelper.server();
+    MpuHelper.server();
 
     WebServerHelper.onSleep(deepSleep);
     WebServerHelper.start();
