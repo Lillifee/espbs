@@ -39,9 +39,7 @@ void setup() {
 
     WebServerHelper.onSleep(deepSleep);
     WebServerHelper.start();
-  }
-
-  if (!WiFiHelper.connect()) {
+  } else if (!WiFiHelper.connect()) {
     deepSleep();
   }
 
@@ -49,6 +47,8 @@ void setup() {
 }
 
 void loop() {
+  MpuHelper.loop();
+
   if (bootCount == 1) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
@@ -56,8 +56,6 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
     delay(500);
   } else {
-    MpuHelper.loop();
-
     if (MpuHelper.prevSide != MpuHelper.side)
       sleepTime = millis() + 1000;
 

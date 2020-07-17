@@ -18,7 +18,7 @@ class MpuHelperClass {
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
 
-  String urls[6];
+  char urls[6][256];
 
   void read();
   void write();
@@ -29,8 +29,8 @@ class MpuHelperClass {
   void readValues();
   void sendHttpRequest();
 
-  unsigned long httpTime;
-  unsigned long setupTime;
+  unsigned long requestDuration;
+  unsigned long setupDuration;
 
   int duration;
   int threshold;

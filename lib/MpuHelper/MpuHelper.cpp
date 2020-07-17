@@ -68,9 +68,9 @@ void MpuHelperClass::setup() {
 
   // logSettings();
 
-  setupTime = millis() - setupStartTime;
+  setupDuration = millis() - setupStartTime;
   Serial.print("Setup MPU helper took ");
-  Serial.println(setupTime);
+  Serial.println(setupDuration);
 }
 
 void MpuHelperClass::loop() {
@@ -111,7 +111,6 @@ void MpuHelperClass::readValues() {
   Serial.println(az);
 
   calculateSide();
-  sendHttpRequest();
 }
 
 int MpuHelperClass::calculateAxis(int16_t &value) {
@@ -147,18 +146,18 @@ void MpuHelperClass::sendHttpRequest() {
   if (prevSide == side) {
     return;
   }
-  unsigned long httpStartTime = millis();
+  unsigned long requestStartTime = millis();
 
   HTTPClient http;
-  Serial.println(urls[side]);
 
+  Serial.println(urls[side]);
   http.begin(urls[side]);
   http.GET();
   http.end();
 
-  httpTime = millis() - httpStartTime;
-  Serial.print("Setup MPU helper took ");
-  Serial.println(setupTime);
+  requestDuration = millis() - requestStartTime;
+  Serial.print("Send http request ");
+  Serial.println(requestDuration);
 }
 
 void MpuHelperClass::logSettings() {
@@ -206,9 +205,9 @@ void MpuHelperClass::server() {
       Serial.println("Update mpu settings");
 
       for (int i = 0; i < 6; i++) {
-        String value = request->arg("side" + String(i));
+        String value = request->arg("sideUrl" + String(i));
         if (value.length() > 0) {
-          urls[i] = request->arg(side);
+          strcpy(urls[i], value.c_str());
         }
       }
 
@@ -223,13 +222,15 @@ void MpuHelperClass::server() {
       JsonVariant &root = response->getRoot();
 
       root["side"] = side;
-      root["setupTime"] = setupTime;
-      root["httpTime"] = httpTime;
+      root["setupDuration"] = setupDuration;
+      root["requestDuration"] = requestDuration;
+
       root["duration"] = duration;
       root["threshold"] = threshold;
 
       for (int i = 0; i < 6; i++) {
-        root["side" + String(i)] = urls[i];
+        String sideUrl = "sideUrl" + String(i);
+        root[sideUrl] = urls[i];
       }
 
       response->setLength();
