@@ -38,8 +38,8 @@ void WebServerHelperClass::start() {
     JsonVariant &root = response->getRoot();
     root["heap"] = ESP.getFreeHeap();
     root["cupFreq"] = ESP.getCpuFreqMHz();
-    root["chipRevision"] = ESP.getChipRevision();
     root["sketchSize"] = ESP.getSketchSize();
+    root["sketchSizeFree"] = ESP.getFreeSketchSpace();
 
     response->setLength();
     request->send(response);
