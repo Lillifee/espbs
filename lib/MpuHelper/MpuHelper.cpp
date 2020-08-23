@@ -2,7 +2,8 @@
 
 void MpuHelperClass::read() {
   preferences.begin("mpu", true);
-  preferences.getBytes("sideUrl", urls, sizeof(urls));
+  host = preferences.getString("host");
+  port = preferences.getInt("port", 3333);
   duration = preferences.getInt("duration", 1);
   threshold = preferences.getInt("threshold", 20);
   preferences.end();
@@ -10,7 +11,8 @@ void MpuHelperClass::read() {
 
 void MpuHelperClass::write() {
   preferences.begin("mpu", false);
-  preferences.putBytes("sideUrl", urls, sizeof(urls));
+  preferences.putString("host", host);
+  preferences.putInt("port", port);
   preferences.putInt("duration", duration);
   preferences.putInt("threshold", threshold);
   preferences.end();
@@ -75,7 +77,7 @@ void MpuHelperClass::setup() {
 
 void MpuHelperClass::loop() {
   readValues();
-  sendHttpRequest();
+  sendValues();
 }
 
 void MpuHelperClass::sleep() {
@@ -141,22 +143,26 @@ void MpuHelperClass::calculateSide() {
   // Serial.println(side);
 }
 
-// TODO replace with udp
-void MpuHelperClass::sendHttpRequest() {
+void MpuHelperClass::sendValues() {
   if (prevSide == side) {
     return;
   }
+  if (host.length() == 0) return;
+  if (!WiFiHelper.connect()) return;
   unsigned long requestStartTime = millis();
 
-  HTTPClient http;
+  StaticJsonDocument<32> doc;
 
-  Serial.println(urls[side]);
-  http.begin(urls[side]);
-  http.GET();
-  http.end();
+  udp.beginPacket(host.c_str(), port);
+
+  doc["side"] = side;
+  serializeJson(doc, udp);
+
+  udp.println();
+  udp.endPacket();
 
   requestDuration = millis() - requestStartTime;
-  Serial.print("Send http request ");
+  Serial.print("Send UDP request ");
   Serial.println(requestDuration);
 }
 
@@ -204,13 +210,8 @@ void MpuHelperClass::server() {
       request->send(200, "text/plain", "message received");
       Serial.println("Update mpu settings");
 
-      for (int i = 0; i < 6; i++) {
-        String value = request->arg("sideUrl" + String(i));
-        if (value.length() > 0) {
-          strcpy(urls[i], value.c_str());
-        }
-      }
-
+      if (request->hasArg("host")) host = request->arg("host");
+      if (request->hasArg("port")) port = request->arg("port").toInt();
       if (request->hasArg("duration")) duration = request->arg("duration").toInt();
       if (request->hasArg("threshold")) threshold = request->arg("threshold").toInt();
 
@@ -225,13 +226,11 @@ void MpuHelperClass::server() {
       root["setupDuration"] = setupDuration;
       root["requestDuration"] = requestDuration;
 
+      root["host"] = host;
+      root["port"] = port;
+
       root["duration"] = duration;
       root["threshold"] = threshold;
-
-      for (int i = 0; i < 6; i++) {
-        String sideUrl = "sideUrl" + String(i);
-        root[sideUrl] = urls[i];
-      }
 
       response->setLength();
       request->send(response);

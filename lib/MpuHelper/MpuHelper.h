@@ -4,21 +4,23 @@
 
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
-#include "HTTPClient.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include "WebServerHelper.h"
+#include "WiFiUdp.h"
 #include "Wire.h"
 
 class MpuHelperClass {
  private:
+  WiFiUDP udp;
   MPU6050 mpu6050;
   Preferences preferences;
 
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
 
-  char urls[6][256];
+  String host;
+  int32_t port;
 
   void read();
   void write();
@@ -27,7 +29,7 @@ class MpuHelperClass {
   void calculateSide();
   void logSettings();
   void readValues();
-  void sendHttpRequest();
+  void sendValues();
 
   unsigned long requestDuration;
   unsigned long setupDuration;

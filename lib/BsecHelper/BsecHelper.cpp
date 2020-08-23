@@ -96,7 +96,7 @@ void BsecHelperClass::sendValues() {
   udp.beginPacket(host.c_str(), port);
 
   doc["rtmp"] = iaqSensor.rawTemperature;
-  doc["pressure"] = iaqSensor.pressure;
+  doc["pressure"] = iaqSensor.pressure / 1000;
   doc["humidity"] = iaqSensor.rawHumidity;
   doc["gasResistance"] = iaqSensor.gasResistance;
   doc["iaq"] = iaqSensor.iaq;
@@ -105,7 +105,7 @@ void BsecHelperClass::sendValues() {
   doc["humidity"] = iaqSensor.humidity;
   doc["staticIaq"] = iaqSensor.staticIaq;
   doc["co2Equivalent"] = iaqSensor.co2Equivalent;
-  doc["breathVocEquivalent"] = iaqSensor.breathVocEquivalent;
+  doc["breathVocEquivalent"] = iaqSensor.breathVocEquivalent * 1000;
 
   serializeJson(doc, udp);
 
@@ -147,7 +147,7 @@ void BsecHelperClass::server() {
       root["requestInterval"] = requestInterval;
 
       root["rtmp"] = iaqSensor.rawTemperature;
-      root["pressure"] = iaqSensor.pressure;
+      root["pressure"] = iaqSensor.pressure / 1000;
       root["rawHumidity"] = iaqSensor.rawHumidity;
       root["gasResistance"] = iaqSensor.gasResistance;
       root["iaq"] = iaqSensor.iaq;
@@ -156,7 +156,7 @@ void BsecHelperClass::server() {
       root["humidity"] = iaqSensor.humidity;
       root["staticIaq"] = iaqSensor.staticIaq;
       root["co2Equivalent"] = iaqSensor.co2Equivalent;
-      root["breathVocEquivalent"] = iaqSensor.breathVocEquivalent;
+      root["breathVocEquivalent"] = iaqSensor.breathVocEquivalent * 1000;
 
       response->setLength();
       request->send(response);
