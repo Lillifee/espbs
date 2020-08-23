@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "BmeHelper.h"
+#include "BsecHelper.h"
 #include "Co2Helper.h"
 #include "WebServerHelper.h"
 #include "WifiHelper.h"
@@ -15,13 +15,13 @@ void setup() {
   Co2Helper.setup();
   Co2Helper.server();
 
-  BmeHelper.setup();
-  BmeHelper.server();
+  BsecHelper.setup();
+  BsecHelper.server();
 
   WebServerHelper.start();
 }
 
 void loop() {
   Co2Helper.loop();
-  BmeHelper.loop();
+  BsecHelper.loop();
 }

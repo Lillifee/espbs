@@ -89,7 +89,7 @@ void BmeHelperClass::sendValues() {
 
   udp.beginPacket(host.c_str(), port);
 
-  doc["temp"] = temp;
+  doc["btmp"] = temp;
   doc["humidity"] = humidity;
   doc["pressure"] = pressure;
   doc["gas"] = gas;

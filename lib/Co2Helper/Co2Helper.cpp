@@ -81,7 +81,7 @@ void Co2HelperClass::sendValues() {
   udp.beginPacket(host.c_str(), port);
 
   doc["co2"] = co2;
-  doc["temp"] = temp;
+  doc["ctmp"] = temp;
   serializeJson(doc, udp);
 
   udp.println();
