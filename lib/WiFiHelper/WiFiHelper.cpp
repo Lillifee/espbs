@@ -161,7 +161,7 @@ void WiFiHelperClass::setupAP() {
   Serial.println("WIFI Setup AP");
 
   WiFi.disconnect();
-  WiFi.softAP("espbs");
+  WiFi.softAP("espbs", "password");
 
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");

@@ -20,7 +20,8 @@
     "tuple": "cpp",
     "iosfwd": "cpp",
     "limits": "cpp",
-    "cstdlib": "cpp"
+    "cstdlib": "cpp",
+    "*.txt": "cpp"
   },
   "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 0 }",
   "editor.formatOnSave": true
