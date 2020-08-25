@@ -131,7 +131,7 @@ void Co2HelperClass::server() {
     }
   });
 
-  WebServerHelper.server.on("/api/co2/calibrate", HTTP_GET, [this](AsyncWebServerRequest *request) {
+  WebServerHelper.server.on("/api/co2Calibrate", HTTP_GET, [this](AsyncWebServerRequest *request) {
     mhz19.setRange();
     mhz19.calibrateZero();
     mhz19.setSpan();

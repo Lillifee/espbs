@@ -1,10 +1,16 @@
 #include "BsecHelper.h"
 
+const uint8_t bsec_config_iaq[] = {
+#include "config/generic_33v_3s_4d/bsec_iaq.txt"
+};
+
 void BsecHelperClass::read() {
   preferences.begin("bsec", true);
   host = preferences.getString("host");
   port = preferences.getInt("port", 3333);
   requestInterval = preferences.getInt("reqInterval", 60000);
+  hasState = preferences.getBool("hasState", false);
+  preferences.getBytes("state", bsecState, BSEC_MAX_STATE_BLOB_SIZE);
   preferences.end();
 }
 
@@ -13,6 +19,20 @@ void BsecHelperClass::write() {
   preferences.putString("host", host);
   preferences.putInt("port", port);
   preferences.putInt("reqInterval", requestInterval);
+  preferences.end();
+}
+
+void BsecHelperClass::writeState(bool set) {
+  iaqSensor.getState(bsecState);
+  Serial.println("Write State set: " + set ? "true" : "false");
+  for (uint8_t i = 0; i < BSEC_MAX_STATE_BLOB_SIZE; i++) {
+    Serial.print(bsecState[i], HEX);
+  }
+  Serial.println("");
+
+  preferences.begin("bsec", false);
+  preferences.putBool("hasState", set);
+  preferences.putBytes("state", bsecState, BSEC_MAX_STATE_BLOB_SIZE);
   preferences.end();
 }
 
@@ -31,6 +51,7 @@ void BsecHelperClass::setup() {
 
   Wire.begin();
   iaqSensor.begin(BME680_I2C_ADDR_PRIMARY, Wire);
+  iaqSensor.setConfig(bsec_config_iaq);
 
   bsec_virtual_sensor_t sensorList[10] = {
       BSEC_OUTPUT_RAW_TEMPERATURE,
@@ -49,6 +70,13 @@ void BsecHelperClass::setup() {
 
   checkSensor();
   read();
+
+  if (hasState) {
+    Serial.println("Setup BSEC SetState");
+    iaqSensor.setState(bsecState);
+  }
+
+  udp.begin(port);
 
   setupDuration = millis() - setupStartTime;
   Serial.print("Setup BSEC helper took ");
@@ -81,8 +109,23 @@ void BsecHelperClass::readValues() {
     Serial.print(", " + String(iaqSensor.co2Equivalent));
     Serial.print(", " + String(iaqSensor.breathVocEquivalent));
     Serial.println("");
+    updateState();
   } else {
     checkSensor();
+  }
+}
+
+void BsecHelperClass::updateState() {
+  if (stateUpdateCounter == 0) {
+    if (iaqSensor.iaqAccuracy >= 3) {
+      stateUpdateCounter++;
+      writeState(true);
+    }
+  } else {
+    if ((stateUpdateCounter * STATE_SAVE_PERIOD) < millis()) {
+      stateUpdateCounter++;
+      writeState(true);
+    }
   }
 }
 
@@ -118,7 +161,7 @@ void BsecHelperClass::sendValues() {
 }
 
 void BsecHelperClass::server() {
-  Serial.println("Setup BME server");
+  Serial.println("Setup BSEC server");
 
   WebServerHelper.server.on("/api/bsec", HTTP_GET, [this](AsyncWebServerRequest *request) {
     int args = request->args();
@@ -161,6 +204,12 @@ void BsecHelperClass::server() {
       response->setLength();
       request->send(response);
     }
+  });
+
+  WebServerHelper.server.on("/api/bsecState", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    writeState(!request->hasArg("reset"));
+    request->send(200, "text/plain", "message received");
+    ESP.restart();
   });
 }
 
