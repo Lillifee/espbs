@@ -14,12 +14,18 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;  // https://github.com/olikraus/u8g2/wiki/fntli
 void WaveshareHelperClass::read() {
   preferences.begin("waveshare", true);
   host = preferences.getString("host");
+  user = preferences.getString("user", "display");
+  password = preferences.getString("password", "display");
+  updateInterval = preferences.getInt("updateInterval", 30);
   preferences.end();
 }
 
 void WaveshareHelperClass::write() {
   preferences.begin("waveshare", false);
   preferences.putString("host", host);
+  preferences.putString("user", user);
+  preferences.putString("password", password);
+  preferences.putInt("updateInterval", updateInterval);
   preferences.end();
 }
 
@@ -35,101 +41,6 @@ void WaveshareHelperClass::setup() {
   Serial.println(setupDuration);
 }
 
-void WaveshareHelperClass::loop() {
-  if (host.length() == 0) return;
-
-  u8g2Fonts.setBackgroundColor(GxEPD_BLACK);
-  u8g2Fonts.setForegroundColor(GxEPD_WHITE);
-  display.fillRect(0, 0, 320, 480, GxEPD_BLACK);
-
-  drawStatus("CO2", host + "/jdev/sps/io/CO2Status", 40, 80);
-  drawStatus("Qualität", host + "/jdev/sps/io/IAQStatus", 40, 200);
-  drawStatus("Feuchtigkeit", host + "/jdev/sps/io/BME680%20Humidity", 40, 320);
-
-  u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
-  u8g2Fonts.setForegroundColor(GxEPD_BLACK);
-
-  u8g2Fonts.setFont(u8g2_font_helvB14_tf);
-  drawString(360, 30, "Allgemein", LEFT);
-  drawString(360, 270, "Heizung", LEFT);
-
-  drawUsage(host + "/jdev/sps/io/AVerbrauch/all", 360, 70);
-  drawUsage(host + "/jdev/sps/io/HVerbrauch/all", 360, 310);
-
-  display.display(false);  // Full screen update mode
-}
-
-void WaveshareHelperClass::drawStatus(String title, String url, int offsetX, int offsetY) {
-  // Send request
-  http.useHTTP10(true);
-  http.begin(url);
-  http.GET();
-
-  // Parse response
-  DynamicJsonDocument doc(2048);
-  deserializeJson(doc, http.getStream());
-
-  // Read values
-  String statusText = doc["LL"]["value"];
-
-  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
-  drawString(offsetX, offsetY, title, LEFT);
-
-  u8g2Fonts.setFont(u8g2_font_helvB24_tf);
-  drawString(offsetX, offsetY + 40, statusText, LEFT);
-
-  // Disconnect
-  http.end();
-}
-
-void WaveshareHelperClass::drawUsage(String url, int offsetX, int offsetY) {
-  // Send request
-  http.useHTTP10(true);
-  http.begin(url);
-  http.GET();
-
-  // Parse response
-  DynamicJsonDocument doc(2048);
-  deserializeJson(doc, http.getStream());
-
-  // Read values
-  float usageC = doc["LL"]["output1"]["value"].as<float>() * 1000;
-  float usage0 = doc["LL"]["output3"]["value"].as<float>();
-  float usage1 = doc["LL"]["output4"]["value"].as<float>();
-  float usage2 = doc["LL"]["output5"]["value"].as<float>();
-
-  // Disconnect
-  http.end();
-
-  u8g2Fonts.setFont(u8g2_font_helvR24_tf);
-  drawString(290 + offsetX, 80 + offsetY, String(usageC, 0) + " W", LEFT);
-
-  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
-  drawString(290 + offsetX, 45 + offsetY, "Aktuell", LEFT);
-
-  drawString(45 + offsetX, 10 + offsetY, "Vorgestern", CENTER);
-  drawString(135 + offsetX, 10 + offsetY, "Gestern", CENTER);
-  drawString(225 + offsetX, 10 + offsetY, "Heute", CENTER);
-
-  display.drawLine(10 + offsetX, 110 + offsetY, 260 + offsetX, 110 + offsetY, GxEPD_BLACK);
-
-  u8g2Fonts.setFont(u8g2_font_helvR14_tf);
-  drawString(45 + offsetX, 130 + offsetY, String(usage2), CENTER);
-  drawString(135 + offsetX, 130 + offsetY, String(usage1), CENTER);
-  drawString(225 + offsetX, 130 + offsetY, String(usage0), CENTER);
-
-  float maxUsage = max(usage2, usage1);
-  maxUsage = max(maxUsage, usage0) / 100;
-
-  float pUsage0 = usage0 / maxUsage * 0.7;
-  float pUsage1 = usage1 / maxUsage * 0.7;
-  float pUsage2 = usage2 / maxUsage * 0.7;
-
-  display.fillRect(35 + offsetX, 111 + offsetY - pUsage2, 20, pUsage2, GxEPD_BLACK);
-  display.fillRect(125 + offsetX, 111 + offsetY - pUsage1, 20, pUsage1, GxEPD_BLACK);
-  display.fillRect(215 + offsetX, 111 + offsetY - pUsage0, 20, pUsage0, GxEPD_BLACK);
-}
-
 void WaveshareHelperClass::initDisplay() {
   display.init(115200, true, 2);
 
@@ -143,6 +54,113 @@ void WaveshareHelperClass::initDisplay() {
   u8g2Fonts.setFont(u8g2_font_helvB10_tf);  // select u8g2 font from here: https://github.com/olikraus/u8g2/wiki/fntlistall
   display.fillScreen(GxEPD_WHITE);
   display.setFullWindow();
+}
+
+void WaveshareHelperClass::update(bool disconnect) {
+  if (host.length() == 0) return;
+
+  u8g2Fonts.setBackgroundColor(GxEPD_BLACK);
+  u8g2Fonts.setForegroundColor(GxEPD_WHITE);
+  display.fillRect(0, 0, 320, 480, GxEPD_BLACK);
+
+  drawStatus("CO2", "/jdev/sps/io/CO2Status", 40, 80);
+  drawStatus("Qualität", "/jdev/sps/io/IAQStatus", 40, 200);
+  drawStatus("Feuchtigkeit", "/jdev/sps/io/HumidityStatus", 40, 320);
+
+  u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
+  u8g2Fonts.setForegroundColor(GxEPD_BLACK);
+
+  drawUsage("Allgemein", "/jdev/sps/io/AVerbrauch/all", 360, 30);
+  drawUsage("Heizung", "/jdev/sps/io/HVerbrauch/all", 360, 270);
+
+  if (disconnect) {
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+  }
+
+  display.display(false);  // Full screen update mode
+}
+
+void WaveshareHelperClass::drawStatus(String title, String urlPart, int offsetX, int offsetY) {
+  DynamicJsonDocument doc(2048);
+  if (!getAndParse(doc, urlPart)) return;
+
+  // Read values
+  String statusText = doc["LL"]["value"];
+
+  u8g2Fonts.setFont(u8g2_font_helvB10_tf);
+  drawString(offsetX, offsetY, title, LEFT);
+
+  u8g2Fonts.setFont(u8g2_font_helvB24_tf);
+  drawString(offsetX, offsetY + 40, statusText, LEFT);
+}
+
+void WaveshareHelperClass::drawUsage(String title, String urlPart, int offsetX, int offsetY) {
+  DynamicJsonDocument doc(2048);
+  if (!getAndParse(doc, urlPart)) return;
+
+  u8g2Fonts.setFont(u8g2_font_helvB14_tf);
+  drawString(offsetX, offsetY, title, LEFT);
+
+  // Read values
+  float usageC = doc["LL"]["output1"]["value"].as<float>() * 1000;
+  float usage0 = doc["LL"]["output3"]["value"].as<float>();
+  float usage1 = doc["LL"]["output4"]["value"].as<float>();
+  float usage2 = doc["LL"]["output5"]["value"].as<float>();
+
+  u8g2Fonts.setFont(u8g2_font_helvR24_tf);
+  drawString(290 + offsetX, 120 + offsetY, String(usageC, 0) + " W", LEFT);
+
+  u8g2Fonts.setFont(u8g2_font_helvB08_tf);
+  drawString(290 + offsetX, 85 + offsetY, "Aktuell", LEFT);
+
+  drawString(45 + offsetX, 50 + offsetY, "Vorgestern", CENTER);
+  drawString(135 + offsetX, 50 + offsetY, "Gestern", CENTER);
+  drawString(225 + offsetX, 50 + offsetY, "Heute", CENTER);
+
+  display.drawLine(10 + offsetX, 150 + offsetY, 260 + offsetX, 150 + offsetY, GxEPD_BLACK);
+
+  u8g2Fonts.setFont(u8g2_font_helvR14_tf);
+  drawString(40 + offsetX, 170 + offsetY, String(usage2), CENTER);
+  drawString(130 + offsetX, 170 + offsetY, String(usage1), CENTER);
+  drawString(225 + offsetX, 170 + offsetY, String(usage0), CENTER);
+
+  float maxUsage = max(usage2, usage1);
+  maxUsage = max(maxUsage, usage0) / 100;
+
+  float pUsage0 = usage0 / maxUsage * 0.7;
+  float pUsage1 = usage1 / maxUsage * 0.7;
+  float pUsage2 = usage2 / maxUsage * 0.7;
+
+  display.fillRect(35 + offsetX, 151 + offsetY - pUsage2, 20, pUsage2, GxEPD_BLACK);
+  display.fillRect(125 + offsetX, 151 + offsetY - pUsage1, 20, pUsage1, GxEPD_BLACK);
+  display.fillRect(215 + offsetX, 151 + offsetY - pUsage0, 20, pUsage0, GxEPD_BLACK);
+}
+
+bool WaveshareHelperClass::getAndParse(JsonDocument &doc, String urlPart) {
+  http.useHTTP10(true);
+  http.begin(host + urlPart);
+  http.setAuthorization(user.c_str(), password.c_str());
+  int httpCode = http.GET();
+
+  if (httpCode != HTTP_CODE_OK) {
+    Serial.print("http error code: ");
+    Serial.println(httpCode);
+    return false;
+  }
+
+  DeserializationError error = deserializeJson(doc, http.getStream());
+
+  http.end();
+
+  // Test if parsing succeeds.
+  if (error) {
+    Serial.print(F("deserializeJson failed: "));
+    Serial.println(error.c_str());
+    return false;
+  }
+
+  return true;
 }
 
 void WaveshareHelperClass::drawString(int x, int y, String text, alignment align) {
@@ -165,6 +183,12 @@ void WaveshareHelperClass::sleep() {
   // Write low to reset
   digitalWrite(SDA, LOW);
   digitalWrite(SCL, LOW);
+
+  pinMode(BUILTIN_LED, INPUT);  // If it's On, turn it off and some boards use GPIO-5 for SPI-SS, which remains low after screen use
+  digitalWrite(BUILTIN_LED, HIGH);
+
+  esp_sleep_enable_timer_wakeup(60000000LL * updateInterval);
+  esp_deep_sleep_start();
 }
 
 void WaveshareHelperClass::server() {
@@ -178,6 +202,9 @@ void WaveshareHelperClass::server() {
       Serial.println("Update Waveshare settings");
 
       if (request->hasArg("host")) host = request->arg("host");
+      if (request->hasArg("user")) user = request->arg("user");
+      if (request->hasArg("password")) password = request->arg("password").toInt();
+      if (request->hasArg("updateInterval")) updateInterval = request->arg("updateInterval").toInt();
 
       write();
       ESP.restart();
@@ -189,6 +216,8 @@ void WaveshareHelperClass::server() {
 
       root["setupDuration"] = setupDuration;
       root["host"] = host;
+      root["user"] = user;
+      root["updateInterval"] = updateInterval;
 
       response->setLength();
       request->send(response);

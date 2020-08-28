@@ -63,7 +63,6 @@ void WiFiHelperClass::server() {
       JsonVariant &root = response->getRoot();
       root["host"] = host;
       root["ssid"] = ssid;
-      root["password"] = password;
 
       root["rssi"] = String(WiFi.RSSI());
       root["time"] = String(wifiTime);

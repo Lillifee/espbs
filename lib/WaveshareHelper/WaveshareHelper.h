@@ -26,6 +26,9 @@ class WaveshareHelperClass {
   Preferences preferences;
   HTTPClient http;
   String host;
+  String user;
+  String password;
+  int32_t updateInterval;
 
   void read();
   void write();
@@ -37,14 +40,15 @@ class WaveshareHelperClass {
 
   void initDisplay();
 
-  void drawStatus(String title, String url, int offsetX, int offsetY);
-  void drawUsage(String url, int offsetX, int offsetY);
+  bool getAndParse(JsonDocument &doc, String urlPart);
+  void drawStatus(String title, String urlPart, int offsetX, int offsetY);
+  void drawUsage(String title, String urlPart, int offsetX, int offsetY);
   void drawString(int x, int y, String text, alignment align);
 
  public:
   void setup();
   void server();
-  void loop();
+  void update(bool disconnect);
   void sleep();
 };
 
