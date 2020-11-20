@@ -5,7 +5,7 @@
 #include "WifiHelper.h"
 
 void setup() {
-  setCpuFrequencyMhz(160);
+  setCpuFrequencyMhz(80);
 
   Serial.begin(115200);
 

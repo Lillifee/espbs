@@ -187,7 +187,8 @@ void WaveshareHelperClass::sleep() {
   pinMode(BUILTIN_LED, INPUT);  // If it's On, turn it off and some boards use GPIO-5 for SPI-SS, which remains low after screen use
   digitalWrite(BUILTIN_LED, HIGH);
 
-  esp_sleep_enable_timer_wakeup(60000000LL * updateInterval);
+  long wakeupTime = uS_TO_S_FACTOR * 60UL * long(updateInterval);
+  esp_sleep_enable_timer_wakeup(wakeupTime);
   esp_deep_sleep_start();
 }
 

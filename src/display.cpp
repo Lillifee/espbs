@@ -32,7 +32,7 @@ void setup() {
     WaveshareHelper.update(false);
   } else {
     // Update if connected
-    if (!WiFiHelper.connect()) {
+    if (WiFiHelper.connect()) {
       WaveshareHelper.update(true);
     }
 

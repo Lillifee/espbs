@@ -16,6 +16,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 480
+#define uS_TO_S_FACTOR 1000000
 
 enum alignment { LEFT,
                  RIGHT,
