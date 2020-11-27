@@ -14,6 +14,7 @@ class WebServerHelperClass {
   void uploadFile(int command, AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 
  public:
+  String application;
   AsyncWebServer server;
   WebServerHelperClass();
   void start();

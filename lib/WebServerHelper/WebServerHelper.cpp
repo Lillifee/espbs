@@ -31,6 +31,17 @@ void WebServerHelperClass::start() {
     }
   });
 
+  WebServerHelper.server.on("/api/application", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    AsyncJsonResponse *response = new AsyncJsonResponse();
+    response->addHeader("Server", "ESP Async Web Server");
+
+    JsonVariant &root = response->getRoot();
+    root["application"] = application;
+
+    response->setLength();
+    request->send(response);
+  });
+
   server.on("/api/esp", HTTP_GET, [this](AsyncWebServerRequest *request) {
     AsyncJsonResponse *response = new AsyncJsonResponse();
     response->addHeader("Server", "ESP Async Web Server");

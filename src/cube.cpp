@@ -25,7 +25,7 @@ void setup() {
   if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
     pinMode(LED_BUILTIN, OUTPUT);
 
-    WiFiHelper.server();
+    WiFiHelper.server("cube");
     MpuHelper.server();
 
     WebServerHelper.onSleep(deepSleep);

@@ -23,7 +23,7 @@ void setup() {
   wakeupReason = esp_sleep_get_wakeup_cause();
 
   if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
-    WiFiHelper.server();
+    WiFiHelper.server("knob");
     KnobHelper.server();
 
     WebServerHelper.onSleep(deepSleep);

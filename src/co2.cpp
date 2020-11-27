@@ -8,7 +8,7 @@ void setup() {
   Serial.begin(115200);
 
   WiFiHelper.setup();
-  WiFiHelper.server();
+  WiFiHelper.server("co2");
 
   Co2Helper.setup();
   Co2Helper.server();
