@@ -34,23 +34,24 @@ You can eigher run the commands in the platformIO terminal or just use the Platf
 ## Setup
 
 On the first startup, the ESP creates an access point called "espbs" to configure your Wi-Fi settings.
-</br> Connect to the WLAN, open the browser with http://espbs or http://192.168.4.1, and add your Wi-Fi settings. </br> I would also recommend using a static IP address to improve the startup time of the ESP.
-After applying the changes the ESP will automatically reboot and connect to your network.
+</br> Connect to the WLAN, open the browser with http://espbs or http://192.168.4.1, and add your Wi-Fi settings. </br>After applying the changes, the ESP will reboot and connect to your network.<br/> I would also recommend using a static IP address to improve the startup time of the ESP.
 
 ![picture](screenshots/website.png)
 
-Some applications are running in deep-sleep to reduce power consumption. Don't forget to send the esp to deep sleep with the ![picture](screenshots/sleep.png) button in the right bottom corner of the "Update" section on the website.
+Some applications are running in deep-sleep to reduce power consumption. <br/>
+If you finished the configuraiton, don't forget to send the esp to deep sleep with the ![picture](screenshots/sleep.png) button in the right bottom corner of the "Update" section.
 
-To change the settings while the esp is in sleep mode, you can press the RESET button to start the webserver again.
+To change the settings while the esp is in sleep mode, you can press the RESET button on the ESP to start the webserver again.
 
 The reset button will not affect your settings, so if you misconfigured your ESP (e.g. wrong Wi-Fi settings) you can erase the flash from the PlatformIO menu and start from scratch.
 
 ## Update firmware
 
-Once the espbs is running, it's possible to update the firmware over the web interface.
+Once the espbs is running, it's possible to update the firmware over the web interface.</br>
+This can be quite handy if you want to update several devices on your network. e.g. multiple CO2 sensors.
 
 - Navigate to the platformIO section in VS Code and press `Build`
-- If you have done changes on the website as well press `Build Filesystem Image`
+- If you have done changes on the website (data) use `Build Filesystem Image`
 - Once the build is finished you should find a firmware.bin and a spiffs.bin (website) in your output folder /.pio/build/{board_name}/
 
 Open the website and upload the new firmware.
@@ -68,7 +69,7 @@ The cube is a remote control for 6 different functions. It uses an MPU6050 to fi
 
 ## CO2
 
-The co2 sends the air quality as a UDP request to your home automation. I added two separate sensors to measure air quality in my living room, the MHZ-19 for the CO2 measurements, and a Bosh BME680 for the overall air quality. This application doesn't use a battery, therefore don't send the ESP to deep sleep after configuration.
+The co2 sends the air quality as a UDP request to your home automation. I added two separate sensors to measure air quality in my living room, the MHZ-19 for the CO2 measurements, and a Bosh BME680 for the overall air quality. This application doesn't use the deep sleep and the website is running all the time, therefore it's not necessary to send the ESP to deep sleep after configuration.
 
 You can find the 3d printing files on https://www.prusaprinters.org/prints/47612-air-quality-sensor-case-esp32
 
