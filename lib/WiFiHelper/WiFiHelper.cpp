@@ -32,6 +32,90 @@ void WiFiHelperClass::write() {
   preferences.end();
 }
 
+void WiFiHelperClass::setup() {
+  read();
+}
+
+bool WiFiHelperClass::connect(bool firstConnect) {
+  if (WiFi.status() == WL_CONNECTED) return true;
+
+  unsigned long wifiStartTime = millis();
+
+  if (mode == "static") {
+    IPAddress ipv4IP;
+    IPAddress dnsIP;
+    IPAddress subnetIP;
+    IPAddress gatewayIP;
+
+    ipv4IP.fromString(ipv4);
+    dnsIP.fromString(dns);
+    subnetIP.fromString(subnet);
+    gatewayIP.fromString(gateway);
+
+    Serial.print("WIFI use static IP: ");
+    Serial.println(ipv4);
+
+    WiFi.config(ipv4IP, gatewayIP, subnetIP, dnsIP);
+  }
+
+  Serial.print("WIFI connect to ");
+  Serial.println(ssid);
+
+  WiFi.mode(WIFI_STA);
+
+  WiFi.setSleep(true);
+  WiFi.begin(ssid.c_str(), password.c_str());
+
+  // The first connect can take a while
+  // use the built in function to wait (up to 10sec)
+  if (firstConnect) {
+    WiFi.waitForConnectResult();
+  } else {
+    int retry = 0;
+    while (WiFi.status() != WL_CONNECTED && retry++ < 100) {
+      delay(10);
+    }
+  }
+
+  wifiTime = millis() - wifiStartTime;
+  Serial.print("WIFI connection took ");
+  Serial.println(String(wifiTime));
+
+  return WiFi.status() == WL_CONNECTED;
+}
+
+void WiFiHelperClass::setupAP() {
+  // configure WiFi AP
+  Serial.println("WIFI Setup AP");
+
+  WiFi.disconnect();
+  WiFi.softAP("espbs", "password");
+
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP.toString());
+}
+
+void WiFiHelperClass::setupMDNS() {
+  // use mdns for host name resolution
+  if (!MDNS.begin(host.c_str())) {
+    Serial.println("Error setting up MDNS responder!");
+  }
+  Serial.print("mDNS responder started connect to http://");
+  Serial.print(host);
+  Serial.println(".local");
+}
+
+void WiFiHelperClass::sleep() {
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+
+  btStop();
+
+  adc_power_off();
+  esp_wifi_stop();
+}
+
 void WiFiHelperClass::server() {
   Serial.println("Setup WiFi helper");
 
@@ -103,87 +187,6 @@ void WiFiHelperClass::server() {
       request->send(response);
     }
   });
-}
-
-void WiFiHelperClass::setup() {
-  read();
-}
-
-bool WiFiHelperClass::connect(bool firstConnect) {
-  if (WiFi.status() == WL_CONNECTED) return true;
-
-  unsigned long wifiStartTime = millis();
-
-  if (mode == "static") {
-    IPAddress ipv4IP;
-    IPAddress dnsIP;
-    IPAddress subnetIP;
-    IPAddress gatewayIP;
-
-    ipv4IP.fromString(ipv4);
-    dnsIP.fromString(dns);
-    subnetIP.fromString(subnet);
-    gatewayIP.fromString(gateway);
-
-    Serial.print("WIFI use static IP: ");
-    Serial.println(ipv4);
-
-    WiFi.config(ipv4IP, gatewayIP, subnetIP, dnsIP);
-  }
-
-  Serial.print("WIFI connect to ");
-  Serial.println(ssid);
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid.c_str(), password.c_str());
-
-  // The first connect can take a while
-  // use the built in function to wait (up to 10sec)
-  if (firstConnect) {
-    WiFi.waitForConnectResult();
-  } else {
-    int retry = 0;
-    while (WiFi.status() != WL_CONNECTED && retry++ < 100) {
-      delay(10);
-    }
-  }
-
-  wifiTime = millis() - wifiStartTime;
-  Serial.print("WIFI connection took ");
-  Serial.println(String(wifiTime));
-
-  return WiFi.status() == WL_CONNECTED;
-}
-
-void WiFiHelperClass::setupAP() {
-  // configure WiFi AP
-  Serial.println("WIFI Setup AP");
-
-  WiFi.disconnect();
-  WiFi.softAP("espbs", "password");
-
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP.toString());
-}
-
-void WiFiHelperClass::setupMDNS() {
-  // use mdns for host name resolution
-  if (!MDNS.begin(host.c_str())) {
-    Serial.println("Error setting up MDNS responder!");
-  }
-  Serial.print("mDNS responder started connect to http://");
-  Serial.print(host);
-  Serial.println(".local");
-}
-
-void WiFiHelperClass::sleep() {
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
-  btStop();
-
-  adc_power_off();
-  esp_wifi_stop();
 }
 
 WiFiHelperClass WiFiHelper;

@@ -4,13 +4,7 @@
 
 #define LED_BUILTIN 5
 unsigned long sleepTime;
-RTC_DATA_ATTR int bootCount = 0;
-
-// Upload the application
-// pio run -t upload
-
-// Upload the website
-// pio run -t uploadfs
+esp_sleep_wakeup_cause_t wakeupReason;
 
 void deepSleep() {
   WiFiHelper.sleep();
@@ -21,17 +15,14 @@ void deepSleep() {
 }
 
 void setup() {
-  ++bootCount;
-  setCpuFrequencyMhz(80);
-
   Serial.begin(115200);
-  Serial.print("bootCount ");
-  Serial.println(String(bootCount));
 
   WiFiHelper.setup();
   MpuHelper.setup();
 
-  if (bootCount == 1) {
+  wakeupReason = esp_sleep_get_wakeup_cause();
+
+  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
     pinMode(LED_BUILTIN, OUTPUT);
 
     WiFiHelper.server();
@@ -49,7 +40,7 @@ void setup() {
 void loop() {
   MpuHelper.loop();
 
-  if (bootCount == 1) {
+  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
 

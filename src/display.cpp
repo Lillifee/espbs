@@ -2,7 +2,7 @@
 #include "WebServerHelper.h"
 #include "WifiHelper.h"
 
-RTC_DATA_ATTR int bootCount = 0;
+esp_sleep_wakeup_cause_t wakeupReason;
 
 void deepSleep() {
   WiFiHelper.sleep();
@@ -10,17 +10,15 @@ void deepSleep() {
 }
 
 void setup() {
-  ++bootCount;
-  setCpuFrequencyMhz(80);
-
   Serial.begin(115200);
-  Serial.print("bootCount ");
-  Serial.println(String(bootCount));
 
   WiFiHelper.setup();
   WaveshareHelper.setup();
 
-  if (bootCount == 1) {
+  wakeupReason = esp_sleep_get_wakeup_cause();
+
+  // Enter configuration mode if the wakeup cause is undefined.
+  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
     pinMode(LED_BUILTIN, OUTPUT);
 
     WiFiHelper.server();
@@ -30,17 +28,18 @@ void setup() {
     WebServerHelper.start();
 
     WaveshareHelper.update(false);
-  } else {
-    // Update if connected
-    if (WiFiHelper.connect()) {
-      WaveshareHelper.update(true);
-    }
-
-    deepSleep();
+    return;
   }
+
+  if (WiFiHelper.connect()) {
+    WaveshareHelper.update(true);
+  }
+
+  deepSleep();
 }
 
 void loop() {
+  // Loop is only executed in configuration mode.
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
 

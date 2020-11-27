@@ -3,7 +3,7 @@
 #include "WifiHelper.h"
 
 unsigned long sleepTime;
-RTC_DATA_ATTR int bootCount = 0;
+esp_sleep_wakeup_cause_t wakeupReason;
 
 void deepSleep() {
   WiFiHelper.sleep();
@@ -15,19 +15,14 @@ void deepSleep() {
 }
 
 void setup() {
-  ++bootCount;
-  setCpuFrequencyMhz(80);
-
   Serial.begin(115200);
-  Serial.print("bootCount ");
-  Serial.println(String(bootCount));
 
   WiFiHelper.setup();
   KnobHelper.setup();
 
-  if (bootCount == 1) {
-    pinMode(LED_BUILTIN, OUTPUT);
+  wakeupReason = esp_sleep_get_wakeup_cause();
 
+  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
     WiFiHelper.server();
     KnobHelper.server();
 
@@ -44,7 +39,13 @@ void loop() {
   KnobHelper.loop();
   delay(50);
 
-  if (bootCount != 1) {
+  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(500);
+  } else {
     if (KnobHelper.value != KnobHelper.prevValue)
       sleepTime = millis() + 2000;
 

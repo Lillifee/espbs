@@ -21,13 +21,10 @@ void KnobHelperClass::setup() {
 
   read();
 
-  //we must initialize rorary encoder
+  // initialize rotary encoder
   rotary.begin();
   rotary.setup([] { rotary.readEncoder_ISR(); });
-
   rotary.setBoundaries(0, 100, false);
-  //optionally we can set boundaries and if values should cycle or not
-  // rotary.setBoundaries(0, 10, true);  //minValue, maxValue, cycle values (when max go to min and vice versa)
 
   setupDuration = millis() - setupStartTime;
   Serial.print("Setup knob helper took ");
@@ -43,28 +40,25 @@ void KnobHelperClass::sleep() {
 }
 
 void KnobHelperClass::readValues() {
-  // Serial.println("Read knob");
   prevValue = value;
   pressed = false;
 
-  //first lets handle rotary encoder button click
+  // first lets handle rotary encoder button click
   if (rotary.currentButtonState() == BUT_RELEASED) {
     pressed = true;
     Serial.println("Button Pressed");
   }
 
-  //lets see if anything changed
-  //optionally we can ignore whenever there is no change
+  // lets see if anything changed
+  // optionally we can ignore whenever there is no change
   int16_t encoderDelta = rotary.encoderChanged();
   if (encoderDelta == 0) return;
 
-  //if value is changed compared to our last read
+  // if value is changed compared to our last read
   if (encoderDelta != 0) {
-    //now we need current value
-
+    // now we need current value
     value = rotary.readEncoder();
 
-    //process new value. Here is simple output.
     Serial.print("Value: ");
     Serial.println(value);
   }
@@ -104,8 +98,6 @@ void KnobHelperClass::server() {
 
       if (request->hasArg("host")) host = request->arg("host");
       if (request->hasArg("port")) port = request->arg("port").toInt();
-      // if (request->hasArg("duration")) duration = request->arg("duration").toInt();
-      // if (request->hasArg("threshold")) threshold = request->arg("threshold").toInt();
 
       write();
 
@@ -120,9 +112,6 @@ void KnobHelperClass::server() {
 
       root["host"] = host;
       root["port"] = port;
-
-      // root["duration"] = duration;
-      // root["threshold"] = threshold;
 
       response->setLength();
       request->send(response);
