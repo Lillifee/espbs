@@ -3,16 +3,16 @@
 Collection of my ESP32 projects.<br/>
 
 The project is set up with [platformIO](https://platformio.org/), and I'm using VS-Code as a code editor. <br/>
-To reuse and maintain the base libraries, I decided to create one single project with separate libraries switchable in the platform.ini.
+To reuse and maintain the base libraries, I decided to create one single project for different applications, switchable in the platform.ini.
 
-Checkout the [espjs project](https://github.com/Lillifee/espjs) to adapt the website.<br/>
-The bundled website (data) is stored on spiffs partition. <br/>
+The bundled configuration website is already part of this project (data) and stored on a separate spiffs partition on the ESP. If you want to adjust the website, please see [espjs project](https://github.com/Lillifee/espjs) <br/>
 
 ## Switch application
 
 To switch the application from e.g. cube to knob
 
 - open the platformio.ini file
+- check the [board](https://docs.platformio.org/en/latest/boards/index.html) type (lolin_d32, lolin32, wemos_d1_mini32 etc.)
 - comment the cube section
 - uncomment the knob section
 
@@ -20,7 +20,7 @@ To switch the application from e.g. cube to knob
 
 You can eigher run the commands in the platformIO terminal or just use the PlatformIO tab in VSCode
 
-### `pio run -t upload` - Build and upload the program
+### `pio run -t upload` - Build and upload the firmware
 
 ### `pio run -t uploadfs` - Build and upload the website partition
 
@@ -28,23 +28,41 @@ You can eigher run the commands in the platformIO terminal or just use the Platf
 
 ![picture](screenshots/upload.png)
 
+- `Upload` - build and upload the firmware (firmware.bin)
+- `Upload Filesystem Image` - Upload the website partition (spiffs.bin)
+
 ## Setup
 
 On the first startup, the ESP creates an access point called "espbs" to configure your Wi-Fi settings.
 </br> Connect to the WLAN, open the browser with http://espbs or http://192.168.4.1, and add your Wi-Fi settings. </br> I would also recommend using a static IP address to improve the startup time of the ESP.
 After applying the changes the ESP will automatically reboot and connect to your network.
 
-Some applications are running in deep-sleep to reduce power consumption. Don't forget to send the esp to deep sleep with the "Z" button in the right bottom corner of the "Update" section on the website.
+![picture](screenshots/website.png)
+
+Some applications are running in deep-sleep to reduce power consumption. Don't forget to send the esp to deep sleep with the ![picture](screenshots/sleep.png) button in the right bottom corner of the "Update" section on the website.
 
 To change the settings while the esp is in sleep mode, you can press the RESET button to start the webserver again.
 
 The reset button will not affect your settings, so if you misconfigured your ESP (e.g. wrong Wi-Fi settings) you can erase the flash from the PlatformIO menu and start from scratch.
 
+## Update firmware
+
+Once the espbs is running, it's possible to update the firmware over the web interface.
+
+- Navigate to the platformIO section in VS Code and press `Build`
+- If you have done changes on the website as well press `Build Filesystem Image`
+- Once the build is finished you should find a firmware.bin and a spiffs.bin (website) in your output folder /.pio/build/{board_name}/
+
+Open the website and upload the new firmware.
+
+- ![picture](screenshots/firmware.png) Press the update firmware button and choose the firmware.bin file.
+- ![picture](screenshots/updateWebsite.png) Press the update website button and choose the spiffs.bin file.
+
 # Applications
 
 ## Cube
 
-The cube is a remote control for 6 different functions. It uses an MPU6050 to figure out which side is on top and send it as a UDP request into your network. To save the battery life, the ESP32 remains in a deep sleep until the cube gets rotated. I switch 4 different light scenes in my living room and control the blinds with the other 2 remaining sides.
+The cube is a remote control for 6 different functions. It uses an MPU6050 to figure out which side is on top and send a UDP request into your network. To save the battery life, the ESP32 remains in a deep sleep until the cube gets rotated. I switch four different light scenes in my living room and control the blinds with the remaining sides.
 
 ![picture](screenshots/cube.png)
 
@@ -75,7 +93,7 @@ You can find the 3d printing files on https://www.prusaprinters.org/prints/47605
 ## Knob
 
 The knob uses a rotary encoder to e.g. dim the light over Wi-Fi.
-To save the battery life the ESP32 remains in a deep sleep until the knob gets pressed. On rotation, the current value is sent via wifi as a UDP packet into the network to my home automation server (loxone). After a few seconds without value change, the ESP goes back to deep sleep.
+To save the battery life the ESP32 remains in a deep sleep until the knob gets pressed. On rotation, the current value is sent as a UDP packet into the network to my home automation server. After a few seconds without value change, the ESP goes back to deep sleep.
 
 You can find the 3d printing files on https://www.prusaprinters.org/prints/47614-wifi-knob-esp32
 
