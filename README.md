@@ -34,12 +34,19 @@ You can eigher run the commands in the platformIO terminal or just use the Platf
 ## Setup
 
 On the first startup, the ESP creates an access point called "espbs" to configure your Wi-Fi settings.
-</br> Connect to the WLAN, open the browser with http://espbs or http://192.168.4.1, and add your Wi-Fi settings. </br>After applying the changes, the ESP will reboot and connect to your network.<br/> I would also recommend using a static IP address to improve the startup time of the ESP.
+</br> Connect to the WLAN `espbs` with password `password`. Open the browser with http://192.168.4.1, and add your Wi-Fi settings.
 
 ![picture](screenshots/website.png)
 
-Some applications are running in deep-sleep to reduce power consumption. <br/>
-If you finished the configuraiton, don't forget to send the esp to deep sleep with the ![picture](screenshots/sleep.png) button in the right bottom corner of the "Update" section.
+I would also recommend using a static IP address to improve the startup time of the ESP.
+<br/> You can also assign a host name. This set the MDNS host name and allows you to connect to your ESP with `http://{yourHostName}.local` in your network.
+
+![picture](screenshots/wifi.png)
+
+After applying the changes, the ESP will reboot and connect to your network.
+
+![picture](screenshots/sleep.png)Some applications are running in deep-sleep to reduce power consumption.
+If you finished the configuraiton, don't forget to send the esp to deep sleep with the sleep button in the right bottom corner of the "Update" section.
 
 To change the settings while the esp is in sleep mode, you can press the RESET button on the ESP to start the webserver again.
 
