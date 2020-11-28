@@ -80,7 +80,9 @@ I made this cube out of a parquet floor because I had no 3d printer back then. S
 
 ### Hardware
 
-MPU6050 - GY512
+- MPU6050 - GY512
+- ESP LOLIN32
+- 3,7V 1100mAh Lithium Akku
 
 ![picture](screenshots/cube_wiring.png)
 
@@ -113,9 +115,9 @@ Copy the library into ./pio/libdeps/BSECSoftwareLibrary and enable the special b
 
 ### Hardware
 
-BME680 - pimoroni
-MH-Z19 CO2 sensor
-ESP LOLIN32
+- BME680 - pimoroni
+- MH-Z19 CO2 sensor
+- ESP LOLIN32
 
 ![picture](screenshots/co2_wiring.png)
 
@@ -128,6 +130,10 @@ You can find the 3d printing files on https://www.prusaprinters.org/prints/47605
 ![picture](screenshots/display.png)
 
 ### Hardware
+
+- ESP LOLIN32
+- Waveshare 7.5 inch e-paper display
+- 3,7V 1100mAh Lithium Akku
 
 ![picture](screenshots/display_wiring.png)
 
@@ -142,8 +148,9 @@ You can find the 3d printing files on https://www.prusaprinters.org/prints/47614
 
 ### Hardware
 
-ESP LOLIN32 lite
-Rotary encoder </br>
+- ESP LOLIN32 lite
+- Rotary encoder
+- 3,7V 1100mAh Lithium Akku
 
 ![picture](screenshots/knob_wiring.png)
 
