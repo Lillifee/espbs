@@ -3,6 +3,8 @@
 Collection of my ESP32 projects.<br/>
 
 The project is set up with [platformIO](https://platformio.org/), and I'm using VS-Code as a code editor. <br/>
+https://randomnerdtutorials.com/vs-code-platformio-ide-esp32-esp8266-arduino/#1a
+
 To reuse and maintain the base libraries, I decided to create one single project for different applications, switchable in the platform.ini.
 
 The bundled configuration website is already part of this project (data) and stored on a separate spiffs partition on the ESP. If you want to adjust the website, please see [espjs project](https://github.com/Lillifee/espjs) <br/>
