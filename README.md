@@ -89,7 +89,9 @@ I made this cube out of a parquet floor because I had no 3d printer back then. S
 INT - is used to wake up from deep sleep. Feel free to use another pin and change it in the ./src/cube.cpp
 esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 1);
 
-I also found a nice article about optimizing for power here: </br>
+### Optimization
+
+I also found a nice article about optimizing for power consumption: </br>
 https://bitbanksoftware.blogspot.com/2018/10/how-low-can-it-go-optimizing-for-power.html
 
 1. Remove the voltage regulator and bridge it.
