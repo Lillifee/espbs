@@ -7,6 +7,8 @@ To reuse and maintain the base libraries, I decided to create one single project
 
 The bundled configuration website is already part of this project (data) and stored on a separate spiffs partition on the ESP. If you want to adjust the website, please see [espjs project](https://github.com/Lillifee/espjs) <br/>
 
+Please let me know if you have ideas, improvements, or problems during setup.</br> I'm also interested in your projects and willing to add them to the repository.</br> If you have fancy 3d prints for an application, send me a message, and I will add them to the readme.
+
 ## Switch application
 
 To switch the application from e.g. cube to knob
@@ -45,7 +47,7 @@ I would also recommend using a static IP address to improve the startup time of 
 
 After applying the changes, the ESP will reboot and connect to your network.
 
-![picture](screenshots/sleep.png)Some applications are running in deep-sleep to reduce power consumption.
+![picture](screenshots/sleep.png) Some applications are running in deep-sleep to reduce power consumption.
 If you finished the configuraiton, don't forget to send the esp to deep sleep with the sleep button in the right bottom corner of the "Update" section.
 
 To change the settings while the esp is in sleep mode, you can press the RESET button on the ESP to start the webserver again.
@@ -72,6 +74,8 @@ Open the website and upload the new firmware.
 
 The cube is a remote control for 6 different functions. It uses an MPU6050 to figure out which side is on top and send a UDP request into your network. To save the battery life, the ESP32 remains in a deep sleep until the cube gets rotated. I switch four different light scenes in my living room and control the blinds with the remaining sides.
 
+I made this cube out of a parquet floor because I had no 3d printer back then. Send me your design's and I will add a link here.
+
 ![picture](screenshots/cube.png)
 
 ### Hardware
@@ -93,7 +97,7 @@ https://bitbanksoftware.blogspot.com/2018/10/how-low-can-it-go-optimizing-for-po
 
 # CO2
 
-The co2 sends the air quality as a UDP request to your home automation. I added two separate sensors to measure air quality in my living room, the MHZ-19 for the CO2 measurements, and a Bosh BME680 for the overall air quality. This application doesn't use the deep sleep and the website is running all the time, therefore it's not necessary to send the ESP to deep sleep after configuration.
+The co2 sends the air quality as a UDP request to your home automation. I added two separate sensors to measure air quality in my living room, the MHZ-19 for the CO2 measurements, and a Bosh BME680 for the overall air quality. This application doesn't use deep sleep, and the website is running all the time. Therefore it's not necessary to send the ESP to deep sleep after configuration.
 
 You can find the 3d printing files on https://www.prusaprinters.org/prints/47612-air-quality-sensor-case-esp32
 
@@ -117,7 +121,7 @@ ESP LOLIN32
 
 # Display
 
-The display uses a waveshare 7.5 inch display to visualize the values of your smart home. I use it to visualize the power consumption and the air quality in the living room. To save the battery life, the ESP32 remains in deep sleep and updates in the configured interval. At the moment, it's not configurable, but you can adjust it to your needs in the lib/WaveshareHelper library.
+The display uses a waveshare 7.5 inch display to visualize the values of your smart home. I use it to visualize the power consumption and the air quality in the living room. To save the battery life, the ESP32 remains in deep sleep and updates in the configured interval. At the moment, the displayed values are not configurable, but you can adjust it to your needs in the lib/WaveshareHelper library.
 
 You can find the 3d printing files on https://www.prusaprinters.org/prints/47605-e-paper-display-stand-esp32
 
@@ -130,7 +134,7 @@ You can find the 3d printing files on https://www.prusaprinters.org/prints/47605
 # Knob
 
 The knob uses a rotary encoder to e.g. dim the light over Wi-Fi.
-To save the battery life the ESP32 remains in a deep sleep until the knob gets pressed. On rotation, the current value is sent as a UDP packet into the network to my home automation server. After a few seconds without value change, the ESP goes back to deep sleep.
+To save the battery life, the ESP32 remains in a deep sleep until the knob gets pressed. On rotation, the current value is sent as a UDP packet into the network to my home automation server. After a few seconds without value change, the ESP goes back to deep sleep.
 
 You can find the 3d printing files on https://www.prusaprinters.org/prints/47614-wifi-knob-esp32
 
