@@ -68,13 +68,30 @@ Open the website and upload the new firmware.
 
 # Applications
 
-## Cube
+# Cube
 
 The cube is a remote control for 6 different functions. It uses an MPU6050 to figure out which side is on top and send a UDP request into your network. To save the battery life, the ESP32 remains in a deep sleep until the cube gets rotated. I switch four different light scenes in my living room and control the blinds with the remaining sides.
 
 ![picture](screenshots/cube.png)
 
-## CO2
+### Hardware
+
+MPU6050 - GY512
+
+![picture](screenshots/cube_wiring.png)
+
+INT - is used to wake up from deep sleep. Feel free to use another pin and change it in the ./src/cube.cpp
+esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 1);
+
+I also found a nice article about optimizing for power here: </br>
+https://bitbanksoftware.blogspot.com/2018/10/how-low-can-it-go-optimizing-for-power.html
+
+1. Remove the voltage regulator and bridge it.
+2. Remove the LED
+
+![picture](screenshots/mpu6050.png)
+
+# CO2
 
 The co2 sends the air quality as a UDP request to your home automation. I added two separate sensors to measure air quality in my living room, the MHZ-19 for the CO2 measurements, and a Bosh BME680 for the overall air quality. This application doesn't use the deep sleep and the website is running all the time, therefore it's not necessary to send the ESP to deep sleep after configuration.
 
@@ -90,7 +107,15 @@ https://github.com/BoschSensortec/BSEC-Arduino-library
 
 Copy the library into ./pio/libdeps/BSECSoftwareLibrary and enable the special build flags in the platformio.ini
 
-## Display
+### Hardware
+
+BME680 - pimoroni
+MH-Z19 CO2 sensor
+ESP LOLIN32
+
+![picture](screenshots/co2_wiring.png)
+
+# Display
 
 The display uses a waveshare 7.5 inch display to visualize the values of your smart home. I use it to visualize the power consumption and the air quality in the living room. To save the battery life, the ESP32 remains in deep sleep and updates in the configured interval. At the moment, it's not configurable, but you can adjust it to your needs in the lib/WaveshareHelper library.
 
@@ -98,7 +123,11 @@ You can find the 3d printing files on https://www.prusaprinters.org/prints/47605
 
 ![picture](screenshots/display.png)
 
-## Knob
+### Hardware
+
+![picture](screenshots/display_wiring.png)
+
+# Knob
 
 The knob uses a rotary encoder to e.g. dim the light over Wi-Fi.
 To save the battery life the ESP32 remains in a deep sleep until the knob gets pressed. On rotation, the current value is sent as a UDP packet into the network to my home automation server. After a few seconds without value change, the ESP goes back to deep sleep.
@@ -106,3 +135,12 @@ To save the battery life the ESP32 remains in a deep sleep until the knob gets p
 You can find the 3d printing files on https://www.prusaprinters.org/prints/47614-wifi-knob-esp32
 
 ![picture](screenshots/knob.png)
+
+### Hardware
+
+ESP LOLIN32 lite
+Rotary encoder </br>
+
+![picture](screenshots/knob_wiring.png)
+
+Feel free to change the wiring in ./lib/KnobHelper/KnobHelper.h and the wakeup pin in ./src/knob.cpp
