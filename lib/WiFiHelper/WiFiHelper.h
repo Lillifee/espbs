@@ -38,7 +38,7 @@ class WiFiHelperClass {
 
  public:
   void setup();
-  void server(String application);
+  void server();
   bool connect(bool firstConnect = false);
   void sleep();
 };

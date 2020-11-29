@@ -1,8 +1,9 @@
 #include "WaveshareHelper.h"
 #include "WebServerHelper.h"
 #include "WifiHelper.h"
+#include "rom/rtc.h"
 
-esp_sleep_wakeup_cause_t wakeupReason;
+RESET_REASON resetReason;
 
 void deepSleep() {
   WiFiHelper.sleep();
@@ -15,17 +16,17 @@ void setup() {
   WiFiHelper.setup();
   WaveshareHelper.setup();
 
-  wakeupReason = esp_sleep_get_wakeup_cause();
+  resetReason = rtc_get_reset_reason(0);
 
-  // Enter configuration mode if the wakeup cause is undefined.
-  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+  // Enter configuration mode on reset
+  if (resetReason == POWERON_RESET) {
     pinMode(LED_BUILTIN, OUTPUT);
 
-    WiFiHelper.server("display");
+    WiFiHelper.server();
     WaveshareHelper.server();
 
     WebServerHelper.onSleep(deepSleep);
-    WebServerHelper.start();
+    WebServerHelper.start("display");
 
     WaveshareHelper.update(false);
     return;

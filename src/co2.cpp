@@ -8,7 +8,7 @@ void setup() {
   Serial.begin(115200);
 
   WiFiHelper.setup();
-  WiFiHelper.server("co2");
+  WiFiHelper.server();
 
   Co2Helper.setup();
   Co2Helper.server();
@@ -16,7 +16,7 @@ void setup() {
   BsecHelper.setup();
   BsecHelper.server();
 
-  WebServerHelper.start();
+  WebServerHelper.start("co2");
 }
 
 void loop() {

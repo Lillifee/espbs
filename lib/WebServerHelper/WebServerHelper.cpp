@@ -2,8 +2,10 @@
 
 WebServerHelperClass::WebServerHelperClass() : server(80){};
 
-void WebServerHelperClass::start() {
+void WebServerHelperClass::start(String application) {
   Serial.println("WebServer start");
+
+  app = application;
 
   if (!SPIFFS.begin()) {
     Serial.println("An Error has occurred while mounting SPIFFS");
@@ -36,7 +38,7 @@ void WebServerHelperClass::start() {
     response->addHeader("Server", "ESP Async Web Server");
 
     JsonVariant &root = response->getRoot();
-    root["application"] = application;
+    root["application"] = app;
 
     response->setLength();
     request->send(response);

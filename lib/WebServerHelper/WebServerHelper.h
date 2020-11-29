@@ -7,17 +7,16 @@
 #include "ESPAsyncWebServer.h"
 #include "SPIFFS.h"
 #include "Update.h"
-#include "WiFiHelper.h"
 
 class WebServerHelperClass {
  private:
   void uploadFile(int command, AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 
  public:
-  String application;
+  String app;
   AsyncWebServer server;
   WebServerHelperClass();
-  void start();
+  void start(String application);
 
   using SleepFunc = void (*)();
   SleepFunc sleep;

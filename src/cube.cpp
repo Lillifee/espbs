@@ -1,10 +1,11 @@
 #include "MpuHelper.h"
 #include "WebServerHelper.h"
 #include "WifiHelper.h"
+#include "rom/rtc.h"
 
 #define LED_BUILTIN 5
 unsigned long sleepTime;
-esp_sleep_wakeup_cause_t wakeupReason;
+RESET_REASON resetReason;
 
 void deepSleep() {
   WiFiHelper.sleep();
@@ -20,16 +21,16 @@ void setup() {
   WiFiHelper.setup();
   MpuHelper.setup();
 
-  wakeupReason = esp_sleep_get_wakeup_cause();
+  resetReason = rtc_get_reset_reason(0);
 
-  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+  if (resetReason == POWERON_RESET) {
     pinMode(LED_BUILTIN, OUTPUT);
 
-    WiFiHelper.server("cube");
+    WiFiHelper.server();
     MpuHelper.server();
 
     WebServerHelper.onSleep(deepSleep);
-    WebServerHelper.start();
+    WebServerHelper.start("cube");
   } else if (!WiFiHelper.connect()) {
     deepSleep();
   }
@@ -40,7 +41,7 @@ void setup() {
 void loop() {
   MpuHelper.loop();
 
-  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+  if (resetReason == POWERON_RESET) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
 

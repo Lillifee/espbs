@@ -116,7 +116,7 @@ void WiFiHelperClass::sleep() {
   esp_wifi_stop();
 }
 
-void WiFiHelperClass::server(String application) {
+void WiFiHelperClass::server() {
   Serial.println("Setup WiFi helper");
 
   if (WiFiHelper.connect(true)) {
@@ -124,8 +124,6 @@ void WiFiHelperClass::server(String application) {
   } else {
     WiFiHelper.setupAP();
   }
-
-  WebServerHelper.application = application;
 
   WebServerHelper.server.on("/api/wifi", HTTP_GET, [this](AsyncWebServerRequest *request) {
     int args = request->args();

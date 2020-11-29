@@ -1,9 +1,10 @@
 #include "KnobHelper.h"
 #include "WebServerHelper.h"
 #include "WifiHelper.h"
+#include "rom/rtc.h"
 
 unsigned long sleepTime;
-esp_sleep_wakeup_cause_t wakeupReason;
+RESET_REASON resetReason;
 
 void deepSleep() {
   WiFiHelper.sleep();
@@ -20,14 +21,14 @@ void setup() {
   WiFiHelper.setup();
   KnobHelper.setup();
 
-  wakeupReason = esp_sleep_get_wakeup_cause();
+  resetReason = rtc_get_reset_reason(0);
 
-  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
-    WiFiHelper.server("knob");
+  if (resetReason == POWERON_RESET) {
+    WiFiHelper.server();
     KnobHelper.server();
 
     WebServerHelper.onSleep(deepSleep);
-    WebServerHelper.start();
+    WebServerHelper.start("knob");
   } else if (!WiFiHelper.connect()) {
     deepSleep();
   }
@@ -39,7 +40,7 @@ void loop() {
   KnobHelper.loop();
   delay(50);
 
-  if (wakeupReason == ESP_SLEEP_WAKEUP_UNDEFINED) {
+  if (resetReason == POWERON_RESET) {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
 
