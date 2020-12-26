@@ -7,7 +7,9 @@
 #include "AsyncJson.h"
 #include "HTTPClient.h"
 #include "MHZ19.h"
+#include "Preferences.h"
 #include "WebServerHelper.h"
+#include "WiFiHelper.h"
 #include "WiFiUdp.h"
 
 class Co2HelperClass {

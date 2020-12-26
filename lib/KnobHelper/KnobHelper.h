@@ -1,13 +1,15 @@
 
-#ifndef MpuHelper_h
-#define MpuHelper_h
+#ifndef KnobHelper_h
+#define KnobHelper_h
 
 #include "AiEsp32RotaryEncoder.h"
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
+#include "Preferences.h"
 #include "WebServerHelper.h"
+#include "WiFiHelper.h"
 #include "WiFiUdp.h"
 #include "Wire.h"
 

@@ -10,6 +10,7 @@ void BsecHelperClass::read() {
   port = preferences.getInt("port", 3333);
   requestInterval = preferences.getInt("reqInterval", 60000);
   hasState = preferences.getBool("hasState", false);
+  tempOffset = preferences.getFloat("tempOffset", 13.5f);
   preferences.getBytes("state", bsecState, BSEC_MAX_STATE_BLOB_SIZE);
   preferences.end();
 }
@@ -19,6 +20,7 @@ void BsecHelperClass::write() {
   preferences.putString("host", host);
   preferences.putInt("port", port);
   preferences.putInt("reqInterval", requestInterval);
+  preferences.putFloat("tempOffset", tempOffset);
   preferences.end();
 }
 
@@ -45,12 +47,12 @@ void BsecHelperClass::checkSensor() {
   }
 }
 
-void BsecHelperClass::setup() {
+void BsecHelperClass::setup(uint8_t i2cAddr) {
   unsigned long setupStartTime = millis();
   Serial.println("Setup BSEC helper");
 
   Wire.begin();
-  iaqSensor.begin(BME680_I2C_ADDR_PRIMARY, Wire);
+  iaqSensor.begin(i2cAddr, Wire);
   iaqSensor.setConfig(bsec_config_iaq);
 
   bsec_virtual_sensor_t sensorList[10] = {
@@ -75,6 +77,10 @@ void BsecHelperClass::setup() {
     Serial.println("Setup BSEC SetState");
     iaqSensor.setState(bsecState);
   }
+
+  iaqSensor.setTemperatureOffset(tempOffset);
+  Serial.print("Setup BSEC helper temp offset ");
+  Serial.println(tempOffset);
 
   udp.begin(port);
 
@@ -108,6 +114,7 @@ void BsecHelperClass::readValues() {
     Serial.print(", " + String(iaqSensor.staticIaq));
     Serial.print(", " + String(iaqSensor.co2Equivalent));
     Serial.print(", " + String(iaqSensor.breathVocEquivalent));
+
     Serial.println("");
     updateState();
   } else {
@@ -139,7 +146,7 @@ void BsecHelperClass::sendValues() {
   udp.beginPacket(host.c_str(), port);
 
   doc["rtmp"] = iaqSensor.rawTemperature;
-  doc["pressure"] = iaqSensor.pressure / 1000;
+  doc["pressure"] = iaqSensor.pressure;
   doc["humidity"] = iaqSensor.rawHumidity;
   doc["gasResistance"] = iaqSensor.gasResistance;
   doc["iaq"] = iaqSensor.iaq;
@@ -148,7 +155,7 @@ void BsecHelperClass::sendValues() {
   doc["humidity"] = iaqSensor.humidity;
   doc["staticIaq"] = iaqSensor.staticIaq;
   doc["co2Equivalent"] = iaqSensor.co2Equivalent;
-  doc["breathVocEquivalent"] = iaqSensor.breathVocEquivalent * 1000;
+  doc["breathVocEquivalent"] = iaqSensor.breathVocEquivalent;
 
   serializeJson(doc, udp);
 
@@ -173,8 +180,10 @@ void BsecHelperClass::server() {
       if (request->hasArg("host")) host = request->arg("host");
       if (request->hasArg("port")) port = request->arg("port").toInt();
       if (request->hasArg("requestInterval")) requestInterval = request->arg("requestInterval").toInt();
+      if (request->hasArg("tempOffset")) tempOffset = request->arg("tempOffset").toFloat();
 
       write();
+      ESP.restart();
 
     } else {
       AsyncJsonResponse *response = new AsyncJsonResponse();
@@ -188,9 +197,10 @@ void BsecHelperClass::server() {
       root["port"] = port;
 
       root["requestInterval"] = requestInterval;
+      root["tempOffset"] = tempOffset;
 
       root["rtmp"] = iaqSensor.rawTemperature;
-      root["pressure"] = iaqSensor.pressure / 1000;
+      root["pressure"] = iaqSensor.pressure;
       root["rawHumidity"] = iaqSensor.rawHumidity;
       root["gasResistance"] = iaqSensor.gasResistance;
       root["iaq"] = iaqSensor.iaq;
@@ -199,7 +209,7 @@ void BsecHelperClass::server() {
       root["humidity"] = iaqSensor.humidity;
       root["staticIaq"] = iaqSensor.staticIaq;
       root["co2Equivalent"] = iaqSensor.co2Equivalent;
-      root["breathVocEquivalent"] = iaqSensor.breathVocEquivalent * 1000;
+      root["breathVocEquivalent"] = iaqSensor.breathVocEquivalent;
 
       response->setLength();
       request->send(response);

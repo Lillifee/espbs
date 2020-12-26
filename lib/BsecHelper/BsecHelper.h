@@ -6,8 +6,10 @@
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
 #include "HTTPClient.h"
+#include "Preferences.h"
 #include "WebServerHelper.h"
 #include "WiFiUdp.h"
+#include "WifiHelper.h"
 #include "bsec.h"
 
 #define STATE_SAVE_PERIOD UINT32_C(360 * 60 * 1000)  // 360 minutes - 4 times a day
@@ -15,7 +17,6 @@
 class BsecHelperClass {
  private:
   WiFiUDP udp;
-  Bsec iaqSensor;
   Preferences preferences;
 
   int32_t requestInterval;
@@ -28,6 +29,7 @@ class BsecHelperClass {
   String host;
   int32_t port;
   bool hasState;
+  float tempOffset;
 
   void read();
   void write();
@@ -43,7 +45,9 @@ class BsecHelperClass {
   unsigned long setupDuration;
 
  public:
-  void setup();
+  Bsec iaqSensor;
+
+  void setup(uint8_t i2cAddr);
   void server();
   void loop();
   void sleep();

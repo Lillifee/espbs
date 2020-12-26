@@ -13,7 +13,7 @@ void setup() {
   Co2Helper.setup();
   Co2Helper.server();
 
-  BsecHelper.setup();
+  BsecHelper.setup(BME680_I2C_ADDR_PRIMARY);
   BsecHelper.server();
 
   WebServerHelper.start("co2");

@@ -21,7 +21,10 @@
     "iosfwd": "cpp",
     "limits": "cpp",
     "cstdlib": "cpp",
-    "*.txt": "cpp"
+    "*.txt": "cpp",
+    "random": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp"
   },
   "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 0 }",
   "editor.formatOnSave": true
