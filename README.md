@@ -159,3 +159,25 @@ You can find the 3d printing files on https://www.prusaprinters.org/prints/47614
 ![picture](screenshots/knob_wiring.png)
 
 Feel free to change the wiring in ./lib/KnobHelper/KnobHelper.h and the wakeup pin in ./src/knob.cpp
+
+# Air quality lamp
+
+The AQI-Led uses a BME680 and a LED ring (WS2812) to visualize the IAQ (Indoor air quality).
+There are different modes to change the visualization on the website.
+
+- The rainbow mode uses individual LEDs like a progress bar. 0 LEDs (excellent) to 24 LEDs (bad).
+- The color change mode uses all LEDs and indicates the IAQ as a color. Green (excellent) to red (bad)
+
+Besides the brightness, minimum value, there are also some animations to create ambient light.
+
+You can find the 3d printing files on https://www.prusaprinters.org/prints/49874-air-quality-lamp
+
+![picture](screenshots/aqiled.png)
+
+### Hardware
+
+- ESP LOLIN32
+- BME680 (BlueDot)
+- LED ring (WS2812)
+
+![picture](screenshots/aqiLed_wiring.png)
