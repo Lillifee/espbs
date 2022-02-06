@@ -132,11 +132,9 @@ void Co2HelperClass::server() {
   });
 
   WebServerHelper.server.on("/api/co2Calibrate", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    mhz19.setRange();
-    mhz19.calibrateZero();
-    mhz19.setSpan();
-
     mhz19.autoCalibration(false);
+    mhz19.calibrate();
+
     request->send(200, "text/plain", "message received");
   });
 }
