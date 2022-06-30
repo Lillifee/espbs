@@ -33,13 +33,14 @@ class WiFiHelperClass {
   void read();
   void write();
 
-  void setupAP();
-  void setupMDNS();
-
  public:
   void setup();
   void server();
   bool connect(bool firstConnect = false);
+
+  void setupAP();
+  void setupMDNS();
+
   void sleep();
 };
 

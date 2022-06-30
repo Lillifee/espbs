@@ -24,7 +24,11 @@
     "*.txt": "cpp",
     "random": "cpp",
     "type_traits": "cpp",
-    "utility": "cpp"
+    "utility": "cpp",
+    "string_view": "cpp",
+    "exception": "cpp",
+    "new": "cpp",
+    "iterator": "cpp"
   },
   "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 0 }",
   "editor.formatOnSave": true

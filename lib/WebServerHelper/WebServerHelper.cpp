@@ -105,4 +105,14 @@ void WebServerHelperClass::onSleep(SleepFunc sleepFn) {
   sleep = sleepFn;
 }
 
+void WebServerHelperClass::pause() {
+  Serial.println("WebServer pause");
+  server.end();
+}
+
+void WebServerHelperClass::resume() {
+  Serial.println("WebServer resume");
+  server.begin();
+}
+
 WebServerHelperClass WebServerHelper;

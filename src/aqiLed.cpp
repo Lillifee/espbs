@@ -25,6 +25,9 @@ void loop() {
     BsecHelper.loop();
   }
 
+  // Reconnect to Wifi on connection lost
+  WiFiHelper.connect();
+
   LedHelper.value = BsecHelper.iaqSensor.iaq + 0.5;
   LedHelper.loop();
 }
