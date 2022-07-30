@@ -112,7 +112,7 @@ void WiFiHelperClass::sleep() {
 
   btStop();
 
-  adc_power_off();
+  adc_power_release();
   esp_wifi_stop();
 }
 

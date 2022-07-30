@@ -11,7 +11,7 @@ void setup() {
   SplitFlapHelper.setup();
   SplitFlapHelper.server();
 
-  WebServerHelper.start("co2");
+  WebServerHelper.start("splitFlap");
 }
 
 void loop() {

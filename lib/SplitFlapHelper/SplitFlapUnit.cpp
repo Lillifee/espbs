@@ -29,23 +29,22 @@ bool SplitFlapUnit::checkHall() {
   hallStatus = digitalRead(hallPin);
 
   // If the hall sensor switch from high to low (falling edge)
-  if ((hallStatus == LOW) & (hallStatusPrev == HIGH)) {
-    // int offset = displayPos < FLAP_COUNT * STEPS_PER_FLAP
-    //                  ? FLAP_COUNT * STEPS_PER_FLAP - displayPos
-    //                  : displayPos;
+  bool hallDetected = ((hallStatusPrev == HIGH) & (hallStatus == LOW));
 
-    // Serial.print(index);
-    // Serial.print(" - Hall sensor detected ");
-    // Serial.print(displayPos);
-    // Serial.print(" - steps away from the center. ");
-    // Serial.println(offset);
+  hallStatusPrev = hallStatus;
 
-    hallStatusPrev = hallStatus;
-    return true;
-  } else {
-    hallStatusPrev = hallStatus;
-    return false;
-  }
+  // if(fallingEdge) {
+  // int offset = displayPos < FLAP_COUNT * STEPS_PER_FLAP
+  //                  ? FLAP_COUNT * STEPS_PER_FLAP - displayPos
+  //                  : displayPos;
+  // Serial.print(index);
+  // Serial.print(" - Hall sensor detected ");
+  // Serial.print(displayPos);
+  // Serial.print(" - steps away from the center. ");
+  // Serial.println(offset);
+  // }
+
+  return hallDetected;
 }
 
 void SplitFlapUnit::load() {

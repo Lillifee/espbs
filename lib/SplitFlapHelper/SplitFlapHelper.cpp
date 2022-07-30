@@ -58,11 +58,9 @@ void SplitFlapHelperClass::loop() {
  * Display the character for each unit.
  */
 void SplitFlapHelperClass::setText() {
-  // xSemaphoreTake(prefMutex, portMAX_DELAY);
+  // Set the target text
   if (targetText == text) return;
-
   targetText = text;
-  // xSemaphoreGive(prefMutex);
 
   enableUnits(true);
 
@@ -98,7 +96,6 @@ void SplitFlapHelperClass::loopUnits() {
   }
 
   if (!enabled) {
-    // WebServerHelper.resume();
     enableUnits(false);
   }
 }
@@ -110,8 +107,6 @@ void SplitFlapHelperClass::enableUnits(bool state) {
   enabled = state;
 
   Serial.println("en/dis-able SplitFlap units");
-  // Disable webserver during flap
-  // state ? WebServerHelper.pause() : WebServerHelper.resume();
   digitalWrite(enablePin, state ? LOW : HIGH);
 }
 

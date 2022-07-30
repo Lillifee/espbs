@@ -3,11 +3,12 @@
 #define WaveshareHelper_h
 #define ENABLE_GxEPD2_display 1
 
+#include "Arduino.h"
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
 #include "GxEPD2_BW.h"
-// #include "I2Cdev.h"
 #include "HTTPClient.h"
+#include "Preferences.h"
 #include "SPI.h"
 #include "U8g2_for_Adafruit_GFX.h"
 #include "WebServerHelper.h"

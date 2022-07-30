@@ -1,3 +1,4 @@
+#include "Arduino.h"
 #include "WaveshareHelper.h"
 #include "WebServerHelper.h"
 #include "WifiHelper.h"
